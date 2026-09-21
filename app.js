@@ -426,8 +426,17 @@
     // beyond that cap is visibly hatched to say "goes further than this,
     // see the exact number above" — the true value is always printed on
     // the bar regardless of whether it's clipped.
+    // Each area's flex-basis is a hard cap (min-height:0 in CSS stops
+    // content from forcing it wider) — so the bar's own max height must
+    // leave room for the value label + gap within that same fixed box,
+    // or the label/bar overflow and push the zero line off-level per
+    // column, which is exactly what broke it last time.
+    const LABEL_H = 15;
+    const GAP = 4;
     const POS_AREA = 56;
     const NEG_AREA = 92;
+    const POS_BAR_MAX = POS_AREA - LABEL_H - GAP;
+    const NEG_BAR_MAX = NEG_AREA - LABEL_H - GAP;
     const maxPosMargin = Math.max(0.05, ...cols.map((c) => Math.max(c.margin, 0)));
     const posCap = Math.min(maxPosMargin, 1);
     const negCap = Math.max(Math.min(maxPosMargin * 4, 1), 0.5);
@@ -436,7 +445,7 @@
       let inner;
       if (c.margin >= 0) {
         const clipped = c.margin > posCap;
-        const h = c.margin > 0 ? Math.max((Math.min(c.margin, posCap) / posCap) * POS_AREA, 3) : 0;
+        const h = c.margin > 0 ? Math.max((Math.min(c.margin, posCap) / posCap) * POS_BAR_MAX, 3) : 0;
         inner = `
           <div class="diverge-pos">
             ${c.margin !== 0 ? `<div class="cell-value">${fmtPct(c.margin, 0)}</div>` : ""}
@@ -448,7 +457,7 @@
       } else {
         const mag = Math.abs(c.margin);
         const clipped = mag > negCap;
-        const h = Math.max((Math.min(mag, negCap) / negCap) * NEG_AREA, 3);
+        const h = Math.max((Math.min(mag, negCap) / negCap) * NEG_BAR_MAX, 3);
         inner = `
           <div class="diverge-pos"></div>
           <div class="diverge-zero"></div>
