@@ -129,7 +129,6 @@
   // 2. OCCUPANCY / EMPTY SEATS
   // ==============================================================
   const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-  const dayInputsWrap = document.createElement("div");
 
   function buildDayInputs() {
     const card = document.createElement("div");
@@ -302,7 +301,7 @@
     const total_fbCost = noS_fbCost + s_fbCost;
     const total_net = noS_net + s_net;
 
-    const breakeven = reward < 1 ? 1 - reward / (1 - fb) : 0;
+    const breakeven = fb < 1 ? 1 - reward / (1 - fb) : 0;
     const repeatRate = 1 - newPct;
     const safe = repeatRate <= breakeven;
 
