@@ -220,8 +220,9 @@
       <div class="stat-card emphasis">
         <div class="stat-label">Gross profit left on the table</div>
         <div class="stat-value">${fmtUSD(totalMissedProfit)}</div>
+        <div class="stat-unit-line">per week</div>
         <div class="stat-annual">${fmtUSD(totalMissedProfit * WEEKS)}/year</div>
-        <div class="stat-sub">per week, after F&amp;B cost</div>
+        <div class="stat-sub">after F&amp;B cost</div>
       </div>
     `;
 
@@ -247,26 +248,26 @@
       <div class="stat-card">
         <div class="stat-label">Seats filled</div>
         <div class="stat-value">${fmtNum(seatsFilled)}</div>
+        <div class="stat-unit-line">per week</div>
         <div class="stat-annual">${fmtNum(seatsFilled * WEEKS)}/year</div>
-        <div class="stat-sub">per week</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Added gross sales</div>
         <div class="stat-value">${fmtUSD(gainSales)}</div>
+        <div class="stat-unit-line">per week</div>
         <div class="stat-annual">${fmtUSD(gainSales * WEEKS)}/year</div>
-        <div class="stat-sub">per week</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Added gross profit</div>
         <div class="stat-value">${fmtUSD(gainProfit)}</div>
+        <div class="stat-unit-line">per week</div>
         <div class="stat-annual">${fmtUSD(gainProfit * WEEKS)}/year</div>
-        <div class="stat-sub">per week</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Added tips for staff</div>
         <div class="stat-value">${fmtUSD(gainTips)}</div>
+        <div class="stat-unit-line">per week</div>
         <div class="stat-annual">${fmtUSD(gainTips * WEEKS)}/year</div>
-        <div class="stat-sub">per week</div>
       </div>
     `;
   }
