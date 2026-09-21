@@ -248,13 +248,6 @@
 
   ["o-max", "o-check", "o-fb"].forEach((id) => on($(id), "input", renderOccupancy));
   on($("o-capture"), "input", renderOccupancy);
-  on($("o-apply"), "click", () => {
-    const slow = num("o-slow");
-    const busy = num("o-busy");
-    for (let i = 0; i < 4; i++) $("o-day-" + i).value = slow;
-    for (let i = 4; i < 7; i++) $("o-day-" + i).value = busy;
-    renderOccupancy();
-  });
 
   // ==============================================================
   // 3. NEW GUEST ECONOMICS
