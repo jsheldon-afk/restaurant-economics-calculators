@@ -442,6 +442,11 @@ table td.pos { color: var(--green); }
 
 /* In-table bar chart row (guarantees pixel-perfect column alignment
    with the data rows below it, since it's the same table) */
+.occ-table th:not(:first-child),
+.occ-table td:not(:first-child) {
+  text-align: center;
+}
+
 .occ-table .chart-row td {
   vertical-align: bottom;
   padding-top: 14px;
