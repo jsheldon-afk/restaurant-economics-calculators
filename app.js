@@ -399,11 +399,11 @@
 
     const salesRows = [
       ["Sales (non-Seated)", (c) => fmtUSD(c.nonSeatedSales)],
-      ["Seated sales (above baseline)", (c) => (c.seatedSales ? fmtUSD(c.seatedSales) : "—")],
+      ["Seated sales", (c) => (c.seatedSales ? fmtUSD(c.seatedSales) : "—")],
     ];
     const costRows = [
       ["F&amp;B cost", (c) => fmtUSD(c.fbCost)],
-      ["Seated cost (above baseline)", (c) => (c.seatedCost ? fmtUSD(c.seatedCost) : "—")],
+      ["Seated cost", (c) => (c.seatedCost ? fmtUSD(c.seatedCost) : "—")],
       ["Fixed cost", () => fmtUSD(-fixed)],
     ];
     const spacerRow = `<tr class="spacer"><td colspan="${cols.length + 1}"></td></tr>`;

@@ -470,11 +470,15 @@ table td.pos { color: var(--green); }
   border-bottom: 1px solid var(--border);
 }
 
-.occ-table .group-row th.group-inhouse { color: var(--muted); }
+.occ-table .group-row th.group-inhouse {
+  color: var(--muted);
+  text-align: right;
+}
 
 .occ-table .group-row th.group-seated {
   color: var(--gold);
   background: var(--gold-tint);
+  text-align: left;
 }
 
 /* vertical divider marking the baseline: everything to the right is the
