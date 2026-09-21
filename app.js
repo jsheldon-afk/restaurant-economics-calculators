@@ -225,12 +225,18 @@
     const capturePct = num("o-capture") / 100;
     $("o-capture-label").textContent = Math.round(capturePct * 100) + "%";
     const seatsFilled = totalEmpty * capturePct;
+    const gainSales = seatsFilled * check;
     const gainProfit = seatsFilled * check * (1 - fb);
     const gainTips = seatsFilled * check * 0.18;
     $("o-capture-stats").innerHTML = `
       <div class="stat-card">
         <div class="stat-label">Seats filled</div>
         <div class="stat-value">${fmtNum(seatsFilled)}</div>
+        <div class="stat-sub">per week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Added gross sales</div>
+        <div class="stat-value">${fmtUSD(gainSales)}</div>
         <div class="stat-sub">per week</div>
       </div>
       <div class="stat-card">

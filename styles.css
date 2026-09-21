@@ -276,8 +276,16 @@ input[type="range"] {
   gap: 14px;
 }
 
+.output-grid.cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 @media (max-width: 700px) {
   .output-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 900px) {
+  .output-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
 }
 
 .stat-card {
