@@ -355,6 +355,25 @@
       return { occPct, guests, sales, seatedSales, nonSeatedSales, fbCost, seatedCost, profit, margin };
     });
 
+    // Headline stats: where profit crosses from negative to positive
+    // (interpolated between the two nearest columns for precision), and
+    // the margin once every seat is filled.
+    const firstProfitableIdx = cols.findIndex((c) => c.profit >= 0);
+    if (firstProfitableIdx === 0) {
+      $("t-breakeven").textContent = "< 10%";
+      $("t-breakeven-sub").textContent = "profitable even at your lowest occupancy shown";
+    } else if (firstProfitableIdx === -1) {
+      $("t-breakeven").textContent = "> 100%";
+      $("t-breakeven-sub").textContent = "not profitable even at full occupancy — try lower fixed costs or a higher baseline";
+    } else {
+      const prev = cols[firstProfitableIdx - 1];
+      const cur = cols[firstProfitableIdx];
+      const breakevenOcc = prev.occPct + ((0 - prev.profit) / (cur.profit - prev.profit)) * (cur.occPct - prev.occPct);
+      $("t-breakeven").textContent = fmtPct(breakevenOcc, 0);
+      $("t-breakeven-sub").textContent = "occupancy where profit turns positive";
+    }
+    $("t-margin100").textContent = fmtPct(cols[cols.length - 1].margin, 1);
+
     // Which columns are filled on the restaurant's own (at/below baseline)
     // vs. filled by Seated (above baseline) — used to group + divide the
     // header and mark the transition column in every row.
@@ -384,10 +403,15 @@
     $("t-thead").innerHTML = `<th style="text-align:left;">Occupancy</th>` + cols.map((c, i) => th(fmtPct(c.occPct, 0), i)).join("");
 
     // bar-chart row, built from the same <td> grid as the data rows below
-    // it so the columns are guaranteed to line up pixel-for-pixel.
+    // it so the columns are guaranteed to line up pixel-for-pixel. A
+    // square-root scale (not linear) keeps one extreme outlier column
+    // from flattening every other bar into an invisible sliver — the
+    // moment margin crosses from red to gold is the whole point of this
+    // chart, and that's usually among the smaller values, not the outlier.
     const maxAbs = Math.max(...cols.map((c) => Math.abs(c.margin)), 0.05);
+    const scale = Math.sqrt(maxAbs) || 1;
     const chartRow = `<tr class="chart-row"><td></td>${cols.map((c, i) => {
-      const h = Math.max((Math.abs(c.margin) / maxAbs) * 108, 2);
+      const h = Math.max((Math.sqrt(Math.abs(c.margin)) / scale) * 108, 2);
       return td(`
         <div class="cell-bar-wrap">
           <div class="cell-value">${fmtPct(c.margin, 0)}</div>
