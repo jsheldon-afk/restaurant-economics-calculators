@@ -232,17 +232,18 @@
             <div class="input-wrap"><input type="number" id="t-fb" value="30" min="0" max="100" step="1" class="has-suffix"><span class="suffix">%</span></div>
           </div>
           <div class="field">
-            <label>Seated cost <span class="hint">% of incremental sales</span></label>
-            <div class="input-wrap"><input type="number" id="t-seated" value="20" min="0" max="100" step="1" class="has-suffix"><span class="suffix">%</span></div>
-          </div>
-          <div class="field">
             <label>Total capacity <span class="hint">covers at 100%</span></label>
             <div class="input-wrap"><input type="number" id="t-cap" value="100" min="1" step="1"></div>
           </div>
           <div class="field">
             <label>Baseline occupancy <span class="hint" id="t-baseline-label">80%</span></label>
             <input type="range" id="t-baseline" min="0" max="100" value="80" step="10">
-            <div class="pill-note">Occupancy you'd hit on your own, before Seated starts filling additional seats.</div>
+            <div class="pill-note">The occupancy you'd hit on your own, without Seated. Sales up to this point only cost you F&amp;B — no Seated fee.</div>
+          </div>
+          <div class="field">
+            <label>Seated cost <span class="hint">% above baseline</span></label>
+            <div class="input-wrap"><input type="number" id="t-seated" value="20" min="0" max="100" step="1" class="has-suffix"><span class="suffix">%</span></div>
+            <div class="pill-note">Seated's fee, charged only on sales <em>above</em> your baseline occupancy — the extra covers Seated fills that you wouldn't have had otherwise.</div>
           </div>
           <div class="field">
             <label>Fixed costs <span class="hint">rent, labor</span></label>

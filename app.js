@@ -342,7 +342,7 @@
       ["Guests", (c) => fmtNum(c.guests)],
       ["Sales", (c) => fmtUSD(c.sales)],
       ["F&amp;B cost", (c) => fmtUSD(c.fbCost)],
-      ["Seated cost", (c) => (c.seatedCost ? fmtUSD(c.seatedCost) : "—")],
+      ["Seated cost (above baseline)", (c) => (c.seatedCost ? fmtUSD(c.seatedCost) : "—")],
       ["Fixed cost", () => fmtUSD(-fixed)],
     ];
     let html = rowsDef.map(([label, fn]) => `<tr><td>${label}</td>${cols.map((c) => `<td>${fn(c)}</td>`).join("")}</tr>`).join("");
