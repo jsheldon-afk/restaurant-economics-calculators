@@ -37,24 +37,34 @@
   // driven by that panel's F&B / Seated reward inputs)
   // ==============================================================
   function renderHow() {
+    const avgCheck = num("n-avgcheck");
+    const seatedGuests = num("n-seatedguests");
+    const newPct = pctInput("n-newpct");
     const fb = pctInput("n-fb");
     const reward = pctInput("n-reward");
-    const newGain = 1 - fb - reward; // per-dollar gain from a new guest
-    const existLoss = reward; // per-dollar loss from an existing/regular guest
 
-    const existingGuests = 4;
-    const newGuests = 3;
-    const lossTotal = existingGuests * existLoss;
-    const gainTotal = newGuests * newGain;
+    const newGainPerGuest = avgCheck * (1 - fb - reward); // $ gain from one new guest
+    const existLossPerGuest = avgCheck * reward; // $ loss from one regular guest
+
+    const newGuests = seatedGuests * newPct;
+    const existingGuests = seatedGuests * (1 - newPct);
+    const lossTotal = existingGuests * existLossPerGuest;
+    const gainTotal = newGuests * newGainPerGuest;
     const net = gainTotal - lossTotal;
 
+    $("how-bullets").innerHTML = `
+      <li>If a guest is <strong>new</strong> — you wouldn't have had them otherwise — you profit on the whole visit.</li>
+      <li>If a guest is <strong>a regular</strong> who would've come in anyway, you just lose the reward you paid for them.</li>
+      <li>Out of the <strong>${fmtNum(seatedGuests)} Seated guests</strong> above, that's roughly <strong>${fmtNum(newGuests)} new</strong> and <strong>${fmtNum(existingGuests)} regulars</strong>.</li>
+    `;
+
     $("how-math-box").innerHTML = `
-      <div class="math-row"><span>Each "new" guest dollar gains you</span><span class="val pos">+${fmtUSD(newGain, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(1 &minus; ${fmtPct(fb, 0)} F&amp;B &minus; ${fmtPct(reward, 0)} Seated rate)</span></span></div>
-      <div class="math-row"><span>Each "regular" guest dollar loses you</span><span class="val neg">&minus;${fmtUSD(existLoss, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(${fmtPct(reward, 0)} Seated rate)</span></span></div>
-      <div class="math-row"><span>${existingGuests} regular guests loses you</span><span class="val neg">&minus;${fmtUSD(lossTotal, { decimals: 2 })}</span></div>
-      <div class="math-row"><span>${newGuests} new guests gains you</span><span class="val pos">+${fmtUSD(gainTotal, { decimals: 2 })}</span></div>
+      <div class="math-row"><span>Each new guest gains you</span><span class="val pos">+${fmtUSD(newGainPerGuest, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(${fmtUSD(avgCheck)} check &times; (1 &minus; ${fmtPct(fb, 0)} F&amp;B &minus; ${fmtPct(reward, 0)} Seated rate))</span></span></div>
+      <div class="math-row"><span>Each regular guest loses you</span><span class="val neg">&minus;${fmtUSD(existLossPerGuest, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(${fmtUSD(avgCheck)} check &times; ${fmtPct(reward, 0)} Seated rate)</span></span></div>
+      <div class="math-row"><span>${fmtNum(existingGuests)} regular guests loses you</span><span class="val neg">&minus;${fmtUSD(lossTotal)}</span></div>
+      <div class="math-row"><span>${fmtNum(newGuests)} new guests gains you</span><span class="val pos">+${fmtUSD(gainTotal)}</span></div>
       <div class="math-row" style="border-top:2px solid var(--ink); margin-top:4px; padding-top:12px; font-weight:700;">
-        <span>Net result</span><span class="val ${net >= 0 ? "pos" : "neg"}">${net >= 0 ? "+" : ""}${fmtUSD(net, { decimals: 2 })}</span>
+        <span>Net result</span><span class="val ${net >= 0 ? "pos" : "neg"}">${net >= 0 ? "+" : ""}${fmtUSD(net)}</span>
       </div>
     `;
   }
@@ -251,12 +261,16 @@
   // ==============================================================
   function renderNewGuest() {
     renderHow();
-    const restaurantSales = num("n-sales");
-    const seatedSales = num("n-seatedsales");
+    const avgCheck = num("n-avgcheck");
+    const nonSeatedGuests = num("n-nonseated");
+    const seatedGuests = num("n-seatedguests");
     const newPct = pctInput("n-newpct");
     const reward = pctInput("n-reward");
     const fb = pctInput("n-fb");
 
+    const restaurantSales = avgCheck * nonSeatedGuests;
+    const seatedSales = avgCheck * seatedGuests;
+    const incrementalSeatedGuests = seatedGuests * newPct;
     const incrementalSeatedSales = seatedSales * newPct;
 
     const noS_sales = restaurantSales;
@@ -285,6 +299,7 @@
       : `At an assumed <strong>${fmtPct(newPct, 0)} new-guest rate</strong> (${fmtPct(repeatRate, 0)} repeat), you're past the breakeven line of ${fmtPct(breakeven, 1)} — Seated is currently net-negative by <strong>${fmtUSD(Math.abs(s_net))}</strong>.`;
 
     const rows = [
+      ["Guests", fmtNum(nonSeatedGuests), fmtNum(incrementalSeatedGuests), fmtNum(nonSeatedGuests + incrementalSeatedGuests), fmtNum(incrementalSeatedGuests)],
       ["Sales", fmtUSD(noS_sales), fmtUSD(s_sales), fmtUSD(total_sales), fmtUSD(total_sales - noS_sales)],
       ["Seated reward cost", "—", fmtUSD(s_rewardCost), fmtUSD(s_rewardCost), fmtUSD(s_rewardCost)],
       ["F&amp;B cost", fmtUSD(noS_fbCost), fmtUSD(s_fbCost), fmtUSD(noS_fbCost + s_fbCost), fmtUSD(s_fbCost)],
@@ -293,7 +308,7 @@
     html += `<tr class="total"><td>Net profit</td><td class="${negClass(noS_net)}">${fmtUSD(noS_net)}</td><td class="${negClass(s_net)}">${fmtUSD(s_net)}</td><td class="${negClass(total_net)}">${fmtUSD(total_net)}</td><td class="${negClass(s_net)}">${fmtUSD(s_net)}</td></tr>`;
     $("n-table").innerHTML = html;
   }
-  ["n-sales", "n-seatedsales", "n-newpct", "n-reward", "n-fb"].forEach((id) => on($(id), "input", renderNewGuest));
+  ["n-avgcheck", "n-nonseated", "n-seatedguests", "n-newpct", "n-reward", "n-fb"].forEach((id) => on($(id), "input", renderNewGuest));
 
   // ==============================================================
   // 4. PROFIT MARGIN BY OCCUPANCY TABLE

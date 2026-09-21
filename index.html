@@ -159,29 +159,21 @@
       <p>Models the net profit impact of Seated-driven sales, and the breakeven point: what share of Seated guests would need to be repeat customers (not new) before Seated stops being profitable.</p>
     </div>
 
-    <div class="explainer" style="margin-bottom:26px;">
-      <p><strong>The simple way to think about it:</strong> every Seated guest is either a sale you wouldn't have had, or a guest you would've served anyway.</p>
-      <ul>
-        <li>If a guest is <strong>new</strong> — you wouldn't have had them otherwise — you profit on the whole visit.</li>
-        <li>If a guest is <strong>a regular</strong> who would've come in anyway, you just lose the reward you paid for them.</li>
-      </ul>
-      <div class="math-box" id="how-math-box">
-        <!-- filled by JS, live-recalculated from the F&amp;B / Seated reward inputs below -->
-      </div>
-      <p style="margin-top:14px; font-size:14.5px;"><strong>The intuition to remember:</strong> Seated's fee doesn't erase your margin — it makes it slightly smaller on the guests you'd have gotten anyway, and pure incremental profit on everyone else. Because the "new guest" gain is so much larger than the "regular guest" cost, each new guest effectively pays for several regulars.</p>
-    </div>
-
     <div class="grid">
       <div class="inputs-card">
         <div class="card">
           <h3>Inputs</h3>
           <div class="field">
-            <label>Sales without Seated <span class="hint">period total</span></label>
-            <div class="input-wrap"><span class="prefix">$</span><input type="number" id="n-sales" value="10000" min="0" step="100" class="has-prefix"></div>
+            <label>Average check <span class="hint">per guest</span></label>
+            <div class="input-wrap"><span class="prefix">$</span><input type="number" id="n-avgcheck" value="50" min="0" step="1" class="has-prefix"></div>
           </div>
           <div class="field">
-            <label>Seated-sourced sales <span class="hint">total value of Seated covers</span></label>
-            <div class="input-wrap"><span class="prefix">$</span><input type="number" id="n-seatedsales" value="1000" min="0" step="50" class="has-prefix"></div>
+            <label>Non-Seated guests <span class="hint">covers, period total</span></label>
+            <div class="input-wrap"><input type="number" id="n-nonseated" value="200" min="0" step="1"></div>
+          </div>
+          <div class="field">
+            <label>Seated guests <span class="hint">covers, period total</span></label>
+            <div class="input-wrap"><input type="number" id="n-seatedguests" value="20" min="0" step="1"></div>
           </div>
           <div class="field">
             <label>New guest rate <span class="hint">% of Seated guests who are incremental</span></label>
@@ -223,6 +215,16 @@
           </table>
         </div>
       </div>
+    </div>
+
+    <div class="explainer" style="margin-top:28px;">
+      <div class="section-title" style="margin-top:0;"><span class="dot"></span>The simple way to think about it</div>
+      <p id="how-intro">Every Seated guest is either a sale you wouldn't have had, or a guest you would've served anyway.</p>
+      <ul id="how-bullets"></ul>
+      <div class="math-box" id="how-math-box">
+        <!-- filled by JS, live-recalculated from the inputs above -->
+      </div>
+      <p style="margin-top:14px; font-size:14.5px;"><strong>The intuition to remember:</strong> Seated's fee doesn't erase your margin — it makes it slightly smaller on the guests you'd have gotten anyway, and pure incremental profit on everyone else. Because the "new guest" gain is so much larger than the "regular guest" cost, each new guest effectively pays for several regulars.</p>
     </div>
   </section>
 
