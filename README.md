@@ -8,7 +8,7 @@ No build step, no dependencies — plain HTML/CSS/JS, deployable as a static sit
 
 1. **How the Math Works** — the core intuition: why a "new" guest dollar nets you money and an "existing" guest dollar costs you the reward fee.
 2. **Nightly Profit Margin** — a night of service with vs. without Seated guests, showing total profit lift even as blended margin % shifts.
-3. **Empty Seats & Occupancy** — day-by-day covers vs. capacity, missed sales/profit/tips, and a slider showing the payoff from capturing a share of empty seats.
+3. **The Cost of an Empty Table** — day-by-day covers vs. capacity, missed sales/profit/tips, and a slider showing the payoff from capturing a share of empty seats.
 4. **New Guest Economics** — net profit from Seated-driven sales plus the cannibalization breakeven rate (the repeat-guest share above which Seated stops paying for itself).
 5. **Profit Margin by Occupancy** — margin at every occupancy level from 10–100%, with a configurable baseline before the Seated fee applies to incremental covers.
 
