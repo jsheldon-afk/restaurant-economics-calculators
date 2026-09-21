@@ -356,22 +356,45 @@
       return { occPct, guests, sales, seatedSales, nonSeatedSales, fbCost, seatedCost, profit, margin };
     });
 
-    // header
-    $("t-thead").innerHTML = `<th style="text-align:left;">Occupancy</th>` + cols.map((c) => `<th>${fmtPct(c.occPct, 0)}</th>`).join("");
+    // Which columns are filled on the restaurant's own (at/below baseline)
+    // vs. filled by Seated (above baseline) — used to group + divide the
+    // header and mark the transition column in every row.
+    const firstSeatedIdx = cols.findIndex((c) => c.seatedCost !== 0);
+    const inHouseCount = firstSeatedIdx === -1 ? cols.length : firstSeatedIdx;
+    const seatedCount = cols.length - inHouseCount;
+
+    // td()/th() add a divider class on the first "Seated" column so every
+    // row (including both header rows) breaks visually at the same spot.
+    const cellClass = (i, extraClass = "") => [extraClass, i === firstSeatedIdx ? "col-divider" : ""].filter(Boolean).join(" ");
+    const td = (content, i, extraClass = "") => {
+      const cls = cellClass(i, extraClass);
+      return `<td${cls ? ` class="${cls}"` : ""}>${content}</td>`;
+    };
+    const th = (content, i, extraClass = "") => {
+      const cls = cellClass(i, extraClass);
+      return `<th${cls ? ` class="${cls}"` : ""}>${content}</th>`;
+    };
+
+    // grouped header row: "Your occupancy" vs "Seated fills the rest"
+    let groupRow = `<th></th>`;
+    if (inHouseCount > 0) groupRow += `<th colspan="${inHouseCount}" class="group-inhouse">Your occupancy</th>`;
+    if (seatedCount > 0) groupRow += `<th colspan="${seatedCount}" class="group-seated col-divider">Seated fills the rest</th>`;
+    $("t-group-row").innerHTML = groupRow;
+
+    // occupancy % header row
+    $("t-thead").innerHTML = `<th style="text-align:left;">Occupancy</th>` + cols.map((c, i) => th(fmtPct(c.occPct, 0), i)).join("");
 
     // bar-chart row, built from the same <td> grid as the data rows below
     // it so the columns are guaranteed to line up pixel-for-pixel.
     const maxAbs = Math.max(...cols.map((c) => Math.abs(c.margin)), 0.05);
-    const firstSeatedIdx = cols.findIndex((c) => c.seatedCost !== 0);
     const chartRow = `<tr class="chart-row"><td></td>${cols.map((c, i) => {
       const h = Math.max((Math.abs(c.margin) / maxAbs) * 108, 2);
-      const marksSeatedStart = i === firstSeatedIdx;
-      return `<td>
+      return td(`
         <div class="cell-bar-wrap">
           <div class="cell-value">${fmtPct(c.margin, 0)}</div>
-          <div class="cell-bar ${c.margin < 0 ? "warn" : ""} ${marksSeatedStart ? "marked" : ""}" style="height:${h}px;"></div>
+          <div class="cell-bar ${c.margin < 0 ? "warn" : ""}" style="height:${h}px;"></div>
         </div>
-      </td>`;
+      `, i);
     }).join("")}</tr>`;
 
     const salesRows = [
@@ -384,15 +407,16 @@
       ["Fixed cost", () => fmtUSD(-fixed)],
     ];
     const spacerRow = `<tr class="spacer"><td colspan="${cols.length + 1}"></td></tr>`;
+    const dataRow = (label, fn) => `<tr><td>${label}</td>${cols.map((c, i) => td(fn(c), i)).join("")}</tr>`;
 
     let html = chartRow;
-    html += `<tr><td>Guests</td>${cols.map((c) => `<td>${fmtNum(c.guests)}</td>`).join("")}</tr>`;
-    html += salesRows.map(([label, fn]) => `<tr><td>${label}</td>${cols.map((c) => `<td>${fn(c)}</td>`).join("")}</tr>`).join("");
-    html += `<tr class="total"><td>Total sales</td>${cols.map((c) => `<td>${fmtUSD(c.sales)}</td>`).join("")}</tr>`;
+    html += dataRow("Guests", (c) => fmtNum(c.guests));
+    html += salesRows.map(([label, fn]) => dataRow(label, fn)).join("");
+    html += `<tr class="total"><td>Total sales</td>${cols.map((c, i) => td(fmtUSD(c.sales), i)).join("")}</tr>`;
     html += spacerRow;
-    html += costRows.map(([label, fn]) => `<tr><td>${label}</td>${cols.map((c) => `<td>${fn(c)}</td>`).join("")}</tr>`).join("");
-    html += `<tr class="total"><td>Profit</td>${cols.map((c) => `<td class="${negClass(c.profit)}">${fmtUSD(c.profit)}</td>`).join("")}</tr>`;
-    html += `<tr><td>Profit margin</td>${cols.map((c) => `<td class="${negClass(c.margin)}">${fmtPct(c.margin)}</td>`).join("")}</tr>`;
+    html += costRows.map(([label, fn]) => dataRow(label, fn)).join("");
+    html += `<tr class="total"><td>Profit</td>${cols.map((c, i) => td(fmtUSD(c.profit), i, negClass(c.profit))).join("")}</tr>`;
+    html += `<tr><td>Profit margin</td>${cols.map((c, i) => td(fmtPct(c.margin), i, negClass(c.margin))).join("")}</tr>`;
     $("t-table").innerHTML = html;
   }
   ["t-spend", "t-fb", "t-seated", "t-cap", "t-fixed"].forEach((id) => on($(id), "input", renderOccTable));

@@ -459,6 +459,31 @@ table td.pos { color: var(--green); }
   border-bottom: 2px solid var(--ink);
 }
 
+/* grouped "Your occupancy" vs "Seated fills the rest" header row */
+.occ-table .group-row th {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.occ-table .group-row th.group-inhouse { color: var(--muted); }
+
+.occ-table .group-row th.group-seated {
+  color: var(--gold);
+  background: var(--gold-tint);
+}
+
+/* vertical divider marking the baseline: everything to the right is the
+   first column where Seated is filling seats above your own occupancy */
+.occ-table td.col-divider,
+.occ-table th.col-divider {
+  border-left: 2px solid var(--ink);
+}
+
 .cell-bar-wrap {
   display: flex;
   flex-direction: column;
