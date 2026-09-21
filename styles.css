@@ -460,7 +460,14 @@ table td.pos { color: var(--green); }
 .occ-table .chart-row td {
   vertical-align: middle;
   padding: 10px 4px;
-  border-bottom: 2px solid var(--ink);
+  border-bottom: 1.5px solid rgba(34, 30, 24, 0.2);
+}
+
+/* the header row directly above the chart — soften from the site-wide
+   2px ink rule so it doesn't bracket the chart with two heavy black
+   lines right on top of an intentionally quiet zero line */
+.occ-table thead th {
+  border-bottom: 1.5px solid rgba(34, 30, 24, 0.15);
 }
 
 /* grouped "Your occupancy" vs "Seated fills the rest" header row */
@@ -533,8 +540,8 @@ table td.pos { color: var(--green); }
    neighbor's and reads as one continuous baseline, not a broken row of
    little caps sitting above each bar */
 .diverge-zero {
-  width: calc(100% + 8px);
-  margin: 0 -4px;
+  width: calc(100% + 12px);
+  margin: 0 -6px;
   height: 1px;
   background: var(--muted);
   opacity: 0.55;
