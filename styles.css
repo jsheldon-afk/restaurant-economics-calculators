@@ -381,6 +381,11 @@ table tr.total td {
   border-bottom: none;
 }
 
+table tr.spacer td {
+  padding: 6px 0;
+  border-bottom: none;
+}
+
 table td.neg { color: var(--red); }
 table td.pos { color: var(--green); }
 

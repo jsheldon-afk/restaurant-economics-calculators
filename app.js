@@ -329,11 +329,12 @@
       const guests = Math.round(occPct * cap);
       const sales = guests * spend;
       const seatedSales = sales > baselineSales ? sales - baselineSales : 0;
+      const nonSeatedSales = sales - seatedSales;
       const fbCost = -(sales * fb);
       const seatedCost = seatedSales ? -(seatedSales * seatedPct) : 0;
       const profit = sales + fbCost + seatedCost - fixed;
       const margin = sales ? profit / sales : 0;
-      return { occPct, guests, sales, seatedSales, fbCost, seatedCost, profit, margin };
+      return { occPct, guests, sales, seatedSales, nonSeatedSales, fbCost, seatedCost, profit, margin };
     });
 
     // header
@@ -354,16 +355,23 @@
       </td>`;
     }).join("")}</tr>`;
 
-    const rowsDef = [
-      ["Guests", (c) => fmtNum(c.guests)],
-      ["Sales", (c) => fmtUSD(c.sales)],
+    const salesRows = [
+      ["Sales (non-Seated)", (c) => fmtUSD(c.nonSeatedSales)],
       ["Seated sales (above baseline)", (c) => (c.seatedSales ? fmtUSD(c.seatedSales) : "—")],
+    ];
+    const costRows = [
       ["F&amp;B cost", (c) => fmtUSD(c.fbCost)],
       ["Seated cost (above baseline)", (c) => (c.seatedCost ? fmtUSD(c.seatedCost) : "—")],
       ["Fixed cost", () => fmtUSD(-fixed)],
     ];
+    const spacerRow = `<tr class="spacer"><td colspan="${cols.length + 1}"></td></tr>`;
+
     let html = chartRow;
-    html += rowsDef.map(([label, fn]) => `<tr><td>${label}</td>${cols.map((c) => `<td>${fn(c)}</td>`).join("")}</tr>`).join("");
+    html += `<tr><td>Guests</td>${cols.map((c) => `<td>${fmtNum(c.guests)}</td>`).join("")}</tr>`;
+    html += salesRows.map(([label, fn]) => `<tr><td>${label}</td>${cols.map((c) => `<td>${fn(c)}</td>`).join("")}</tr>`).join("");
+    html += `<tr class="total"><td>Total sales</td>${cols.map((c) => `<td>${fmtUSD(c.sales)}</td>`).join("")}</tr>`;
+    html += spacerRow;
+    html += costRows.map(([label, fn]) => `<tr><td>${label}</td>${cols.map((c) => `<td>${fn(c)}</td>`).join("")}</tr>`).join("");
     html += `<tr class="total"><td>Profit</td>${cols.map((c) => `<td class="${negClass(c.profit)}">${fmtUSD(c.profit)}</td>`).join("")}</tr>`;
     html += `<tr><td>Profit margin</td>${cols.map((c) => `<td class="${negClass(c.margin)}">${fmtPct(c.margin)}</td>`).join("")}</tr>`;
     $("t-table").innerHTML = html;
