@@ -33,13 +33,14 @@
   });
 
   // ==============================================================
-  // HOW THE MATH WORKS
+  // HOW THE MATH WORKS (lives inside the New Guest Economics panel,
+  // driven by that panel's F&B / Seated reward inputs)
   // ==============================================================
   function renderHow() {
-    const fb = pctInput("how-fb");
-    const reward = pctInput("how-reward");
+    const fb = pctInput("n-fb");
+    const reward = pctInput("n-reward");
     const newGain = 1 - fb - reward; // per-dollar gain from a new guest
-    const existLoss = reward; // per-dollar loss from an existing guest
+    const existLoss = reward; // per-dollar loss from an existing/regular guest
 
     const existingGuests = 4;
     const newGuests = 3;
@@ -49,16 +50,14 @@
 
     $("how-math-box").innerHTML = `
       <div class="math-row"><span>Each "new" guest dollar gains you</span><span class="val pos">+${fmtUSD(newGain, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(1 &minus; ${fmtPct(fb, 0)} F&amp;B &minus; ${fmtPct(reward, 0)} Seated rate)</span></span></div>
-      <div class="math-row"><span>Each "existing" guest dollar loses you</span><span class="val neg">&minus;${fmtUSD(existLoss, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(${fmtPct(reward, 0)} Seated rate)</span></span></div>
-      <div class="math-row"><span>${existingGuests} existing guests loses you</span><span class="val neg">&minus;${fmtUSD(lossTotal, { decimals: 2 })}</span></div>
+      <div class="math-row"><span>Each "regular" guest dollar loses you</span><span class="val neg">&minus;${fmtUSD(existLoss, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(${fmtPct(reward, 0)} Seated rate)</span></span></div>
+      <div class="math-row"><span>${existingGuests} regular guests loses you</span><span class="val neg">&minus;${fmtUSD(lossTotal, { decimals: 2 })}</span></div>
       <div class="math-row"><span>${newGuests} new guests gains you</span><span class="val pos">+${fmtUSD(gainTotal, { decimals: 2 })}</span></div>
       <div class="math-row" style="border-top:2px solid var(--ink); margin-top:4px; padding-top:12px; font-weight:700;">
         <span>Net result</span><span class="val ${net >= 0 ? "pos" : "neg"}">${net >= 0 ? "+" : ""}${fmtUSD(net, { decimals: 2 })}</span>
       </div>
     `;
   }
-  on($("how-fb"), "input", renderHow);
-  on($("how-reward"), "input", renderHow);
 
   // ==============================================================
   // 1. NIGHTLY PROFIT MARGIN
@@ -251,6 +250,7 @@
   // 3. NEW GUEST ECONOMICS
   // ==============================================================
   function renderNewGuest() {
+    renderHow();
     const restaurantSales = num("n-sales");
     const seatedSales = num("n-seatedsales");
     const newPct = pctInput("n-newpct");
@@ -272,8 +272,8 @@
     const total_net = noS_net + s_net;
 
     const breakeven = reward < 1 ? 1 - reward / (1 - fb) : 0;
-    const currentCannibalization = 1 - newPct;
-    const safe = currentCannibalization <= breakeven;
+    const repeatRate = 1 - newPct;
+    const safe = repeatRate <= breakeven;
 
     $("n-netprofit").textContent = fmtUSD(s_net);
     $("n-netprofit-sub").textContent = `from ${fmtUSD(s_sales)} in incremental sales`;
@@ -281,8 +281,8 @@
 
     $("n-callout").className = "callout " + (safe ? "" : "negative");
     $("n-callout").innerHTML = safe
-      ? `At an assumed <strong>${fmtPct(newPct, 0)} new-guest rate</strong> (${fmtPct(currentCannibalization, 0)} repeat), you're well inside the breakeven line of ${fmtPct(breakeven, 1)} — Seated is net-positive by <strong>${fmtUSD(s_net)}</strong>.`
-      : `At an assumed <strong>${fmtPct(newPct, 0)} new-guest rate</strong> (${fmtPct(currentCannibalization, 0)} repeat), you're past the breakeven line of ${fmtPct(breakeven, 1)} — Seated is currently net-negative by <strong>${fmtUSD(Math.abs(s_net))}</strong>.`;
+      ? `At an assumed <strong>${fmtPct(newPct, 0)} new-guest rate</strong> (${fmtPct(repeatRate, 0)} repeat), you're well inside the breakeven line of ${fmtPct(breakeven, 1)} — Seated is net-positive by <strong>${fmtUSD(s_net)}</strong>.`
+      : `At an assumed <strong>${fmtPct(newPct, 0)} new-guest rate</strong> (${fmtPct(repeatRate, 0)} repeat), you're past the breakeven line of ${fmtPct(breakeven, 1)} — Seated is currently net-negative by <strong>${fmtUSD(Math.abs(s_net))}</strong>.`;
 
     const rows = [
       ["Sales", fmtUSD(noS_sales), fmtUSD(s_sales), fmtUSD(total_sales), fmtUSD(total_sales - noS_sales)],

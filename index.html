@@ -22,8 +22,7 @@
 
 <nav class="tabs">
   <div class="wrap" id="tab-buttons">
-    <button class="tab-btn active" data-tab="how">How the Math Works</button>
-    <button class="tab-btn" data-tab="margin">Nightly Profit Margin</button>
+    <button class="tab-btn active" data-tab="margin">Nightly Profit Margin</button>
     <button class="tab-btn" data-tab="occupancy">Empty Seats &amp; Occupancy</button>
     <button class="tab-btn" data-tab="newguest">New Guest Economics</button>
     <button class="tab-btn" data-tab="occtable">Profit Margin by Occupancy</button>
@@ -32,44 +31,8 @@
 
 <main>
 
-  <!-- ===================== HOW IT WORKS ===================== -->
-  <section class="panel active" id="panel-how">
-    <div class="panel-intro">
-      <h2>The simple math problem</h2>
-      <p>Every calculator on this site is a variation on one idea: a Seated guest either brings you sales you wouldn't have had, or it's a guest you would have served anyway. The economics only work if enough of them are the former.</p>
-    </div>
-
-    <div class="explainer">
-      <p>Imagine Seated sends you 10 guests this week.</p>
-      <ul>
-        <li>If <strong>all 10 are new</strong> — guests you wouldn't have otherwise had — you profit big.</li>
-        <li>If <strong>all 10 are existing</strong> customers who would've come in anyway, you lose out on the reward you paid for them.</li>
-      </ul>
-
-      <div class="math-box" id="how-math-box">
-        <!-- filled by JS, live-recalculated from the mini inputs below -->
-      </div>
-
-      <div class="card" style="max-width:520px;">
-        <h3>Try your own numbers</h3>
-        <div class="field-row">
-          <div class="field">
-            <label>F&amp;B cost <span class="hint">% of sales</span></label>
-            <div class="input-wrap"><input type="number" id="how-fb" value="30" min="0" max="100" step="1" class="has-suffix"><span class="suffix">%</span></div>
-          </div>
-          <div class="field">
-            <label>Seated reward <span class="hint">% of sales</span></label>
-            <div class="input-wrap"><input type="number" id="how-reward" value="25" min="0" max="100" step="1" class="has-suffix"><span class="suffix">%</span></div>
-          </div>
-        </div>
-      </div>
-
-      <p style="margin-top:22px;"><strong>The intuition to remember:</strong> Seated's fee doesn't erase your margin — it makes it slightly smaller on the guests you'd have gotten anyway, and pure incremental profit on everyone else. Because the "new guest" gain is so much larger than the "existing guest" cost, each new guest effectively pays for several existing ones. Use the tabs above to run this against a real restaurant's numbers.</p>
-    </div>
-  </section>
-
   <!-- ===================== NIGHTLY PROFIT MARGIN ===================== -->
-  <section class="panel" id="panel-margin">
+  <section class="panel active" id="panel-margin">
     <div class="panel-intro">
       <h2>Nightly Profit Margin: With vs. Without Seated</h2>
       <p>Compares a night of service with only walk-in / house guests against the same night plus Seated-driven covers. Shows that blended margin % can dip slightly while total dollar profit still goes up.</p>
@@ -192,8 +155,20 @@
   <!-- ===================== NEW GUEST ECONOMICS ===================== -->
   <section class="panel" id="panel-newguest">
     <div class="panel-intro">
-      <h2>New Guest Economics &amp; Cannibalization Breakeven</h2>
-      <p>Models the net profit impact of Seated-driven sales, and the breakeven point: what share of Seated guests would need to be repeat customers (not incremental) before Seated stops being profitable.</p>
+      <h2>New Guest Economics</h2>
+      <p>Models the net profit impact of Seated-driven sales, and the breakeven point: what share of Seated guests would need to be repeat customers (not new) before Seated stops being profitable.</p>
+    </div>
+
+    <div class="explainer" style="margin-bottom:26px;">
+      <p><strong>The simple way to think about it:</strong> every Seated guest is either a sale you wouldn't have had, or a guest you would've served anyway.</p>
+      <ul>
+        <li>If a guest is <strong>new</strong> — you wouldn't have had them otherwise — you profit on the whole visit.</li>
+        <li>If a guest is <strong>a regular</strong> who would've come in anyway, you just lose the reward you paid for them.</li>
+      </ul>
+      <div class="math-box" id="how-math-box">
+        <!-- filled by JS, live-recalculated from the F&amp;B / Seated reward inputs below -->
+      </div>
+      <p style="margin-top:14px; font-size:14.5px;"><strong>The intuition to remember:</strong> Seated's fee doesn't erase your margin — it makes it slightly smaller on the guests you'd have gotten anyway, and pure incremental profit on everyone else. Because the "new guest" gain is so much larger than the "regular guest" cost, each new guest effectively pays for several regulars.</p>
     </div>
 
     <div class="grid">
@@ -231,7 +206,7 @@
             <div class="stat-sub" id="n-netprofit-sub"></div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Breakeven cannibalization rate</div>
+            <div class="stat-label">Breakeven repeat-guest rate</div>
             <div class="stat-value" id="n-breakeven">—</div>
             <div class="stat-sub">Above this share of repeat guests, Seated stops paying for itself</div>
           </div>
