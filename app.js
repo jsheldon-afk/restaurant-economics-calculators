@@ -415,22 +415,50 @@
     // occupancy % header row
     $("t-thead").innerHTML = `<th style="text-align:left;">Occupancy</th>` + cols.map((c, i) => th(fmtPct(c.occPct, 0), i)).join("");
 
-    // bar-chart row, built from the same <td> grid as the data rows below
-    // it so the columns are guaranteed to line up pixel-for-pixel. A
-    // square-root scale (not linear) keeps one extreme outlier column
-    // from flattening every other bar into an invisible sliver — the
-    // moment margin crosses from red to gold is the whole point of this
-    // chart, and that's usually among the smaller values, not the outlier.
-    const maxAbs = Math.max(...cols.map((c) => Math.abs(c.margin)), 0.05);
-    const scale = Math.sqrt(maxAbs) || 1;
+    // Bar-chart row, built from the same <td> grid as the data rows below
+    // it so the columns are guaranteed to line up pixel-for-pixel.
+    //
+    // Diverging design: profit grows UP from a shared zero line, loss
+    // grows DOWN from it — so direction, not just color, tells you which
+    // side of breakeven a column is on. The scale is genuinely linear
+    // (no lie-factor from a log/sqrt trick); instead, the loss side is
+    // capped at a sane multiple of the largest profit margin and any bar
+    // beyond that cap is visibly hatched to say "goes further than this,
+    // see the exact number above" — the true value is always printed on
+    // the bar regardless of whether it's clipped.
+    const POS_AREA = 56;
+    const NEG_AREA = 92;
+    const maxPosMargin = Math.max(0.05, ...cols.map((c) => Math.max(c.margin, 0)));
+    const posCap = Math.min(maxPosMargin, 1);
+    const negCap = Math.max(Math.min(maxPosMargin * 4, 1), 0.5);
+
     const chartRow = `<tr class="chart-row"><td></td>${cols.map((c, i) => {
-      const h = Math.max((Math.sqrt(Math.abs(c.margin)) / scale) * 108, 2);
-      return td(`
-        <div class="cell-bar-wrap">
-          <div class="cell-value">${fmtPct(c.margin, 0)}</div>
-          <div class="cell-bar ${c.margin < 0 ? "warn" : ""}" style="height:${h}px;"></div>
-        </div>
-      `, i);
+      let inner;
+      if (c.margin >= 0) {
+        const clipped = c.margin > posCap;
+        const h = c.margin > 0 ? Math.max((Math.min(c.margin, posCap) / posCap) * POS_AREA, 3) : 0;
+        inner = `
+          <div class="diverge-pos">
+            ${c.margin !== 0 ? `<div class="cell-value">${fmtPct(c.margin, 0)}</div>` : ""}
+            <div class="diverge-bar pos${clipped ? " clipped" : ""}" style="height:${h}px;"></div>
+          </div>
+          <div class="diverge-zero"></div>
+          <div class="diverge-neg"></div>
+        `;
+      } else {
+        const mag = Math.abs(c.margin);
+        const clipped = mag > negCap;
+        const h = Math.max((Math.min(mag, negCap) / negCap) * NEG_AREA, 3);
+        inner = `
+          <div class="diverge-pos"></div>
+          <div class="diverge-zero"></div>
+          <div class="diverge-neg">
+            <div class="diverge-bar neg${clipped ? " clipped" : ""}" style="height:${h}px;"></div>
+            <div class="cell-value">${fmtPct(c.margin, 0)}</div>
+          </div>
+        `;
+      }
+      return td(`<div class="diverge-cell">${inner}</div>`, i);
     }).join("")}</tr>`;
 
     const salesRows = [
