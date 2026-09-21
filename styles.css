@@ -332,6 +332,18 @@ input[type="range"] {
   margin-top: 4px;
 }
 
+/* a secondary, annualized (x52) figure sitting between the weekly
+   headline value and the fine-print sub-line — present enough to
+   register at a glance, without competing with the primary number */
+.stat-annual {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-top: 3px;
+}
+
+.stat-card.emphasis .stat-annual { color: var(--gold-fill); }
+
 .callout {
   background: var(--gold-tint);
   border: 1px solid #EBD9A0;
