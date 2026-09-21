@@ -440,6 +440,46 @@ table td.pos { color: var(--green); }
   font-weight: 700;
 }
 
+/* In-table bar chart row (guarantees pixel-perfect column alignment
+   with the data rows below it, since it's the same table) */
+.occ-table .chart-row td {
+  vertical-align: bottom;
+  padding-top: 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.cell-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 132px;
+  gap: 6px;
+}
+
+.cell-bar-wrap .cell-bar {
+  width: 70%;
+  max-width: 36px;
+  background: var(--gold-fill);
+  border-radius: 4px 4px 0 0;
+  transition: height 0.2s ease;
+}
+
+.cell-bar-wrap .cell-bar.warn { background: var(--red); }
+
+.cell-bar-wrap .cell-bar.marked {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.cell-bar-wrap .cell-value {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
 .section-title {
   font-size: 16px;
   font-weight: 700;

@@ -338,6 +338,21 @@
     // header
     $("t-thead").innerHTML = `<th style="text-align:left;">Occupancy</th>` + cols.map((c) => `<th>${fmtPct(c.occPct, 0)}</th>`).join("");
 
+    // bar-chart row, built from the same <td> grid as the data rows below
+    // it so the columns are guaranteed to line up pixel-for-pixel.
+    const maxAbs = Math.max(...cols.map((c) => Math.abs(c.margin)), 0.05);
+    const firstSeatedIdx = cols.findIndex((c) => c.seatedCost !== 0);
+    const chartRow = `<tr class="chart-row"><td></td>${cols.map((c, i) => {
+      const h = Math.max((Math.abs(c.margin) / maxAbs) * 108, 2);
+      const marksSeatedStart = i === firstSeatedIdx;
+      return `<td>
+        <div class="cell-bar-wrap">
+          <div class="cell-value">${fmtPct(c.margin, 0)}</div>
+          <div class="cell-bar ${c.margin < 0 ? "warn" : ""} ${marksSeatedStart ? "marked" : ""}" style="height:${h}px;"></div>
+        </div>
+      </td>`;
+    }).join("")}</tr>`;
+
     const rowsDef = [
       ["Guests", (c) => fmtNum(c.guests)],
       ["Sales", (c) => fmtUSD(c.sales)],
@@ -345,23 +360,11 @@
       ["Seated cost (above baseline)", (c) => (c.seatedCost ? fmtUSD(c.seatedCost) : "—")],
       ["Fixed cost", () => fmtUSD(-fixed)],
     ];
-    let html = rowsDef.map(([label, fn]) => `<tr><td>${label}</td>${cols.map((c) => `<td>${fn(c)}</td>`).join("")}</tr>`).join("");
+    let html = chartRow;
+    html += rowsDef.map(([label, fn]) => `<tr><td>${label}</td>${cols.map((c) => `<td>${fn(c)}</td>`).join("")}</tr>`).join("");
     html += `<tr class="total"><td>Profit</td>${cols.map((c) => `<td class="${negClass(c.profit)}">${fmtUSD(c.profit)}</td>`).join("")}</tr>`;
     html += `<tr><td>Profit margin</td>${cols.map((c) => `<td class="${negClass(c.margin)}">${fmtPct(c.margin)}</td>`).join("")}</tr>`;
     $("t-table").innerHTML = html;
-
-    // bars (margin, can be negative)
-    const maxAbs = Math.max(...cols.map((c) => Math.abs(c.margin)), 0.05);
-    const firstSeatedIdx = cols.findIndex((c) => c.seatedCost !== 0);
-    $("t-bars").innerHTML = cols.map((c, i) => {
-      const h = Math.max((Math.abs(c.margin) / maxAbs) * 128, 2);
-      const marksSeatedStart = i === firstSeatedIdx;
-      return `<div class="bar-col">
-        <div class="bar-value">${fmtPct(c.margin, 0)}</div>
-        <div class="bar ${c.margin < 0 ? "warn" : ""}" style="height:${h}px; ${marksSeatedStart ? "outline:2px solid var(--ink); outline-offset:2px;" : ""}"></div>
-        <div class="bar-label">${fmtPct(c.occPct, 0)}</div>
-      </div>`;
-    }).join("");
   }
   ["t-spend", "t-fb", "t-seated", "t-cap", "t-fixed"].forEach((id) => on($(id), "input", renderOccTable));
   on($("t-baseline"), "input", renderOccTable);
