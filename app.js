@@ -60,9 +60,9 @@
 
     $("how-math-box").innerHTML = `
       <div class="math-row"><span>Each new guest gains you</span><span class="val pos">+${fmtUSD(newGainPerGuest, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(${fmtUSD(avgCheck)} check &times; (1 &minus; ${fmtPct(fb, 0)} F&amp;B &minus; ${fmtPct(reward, 0)} Seated rate))</span></span></div>
+      <div class="math-row"><span>${fmtNum(newGuests)} new guests gains you</span><span class="val pos">+${fmtUSD(gainTotal)}</span></div>
       <div class="math-row"><span>Each regular guest loses you</span><span class="val neg">&minus;${fmtUSD(existLossPerGuest, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(${fmtUSD(avgCheck)} check &times; ${fmtPct(reward, 0)} Seated rate)</span></span></div>
       <div class="math-row"><span>${fmtNum(existingGuests)} regular guests loses you</span><span class="val neg">&minus;${fmtUSD(lossTotal)}</span></div>
-      <div class="math-row"><span>${fmtNum(newGuests)} new guests gains you</span><span class="val pos">+${fmtUSD(gainTotal)}</span></div>
       <div class="math-row" style="border-top:2px solid var(--ink); margin-top:4px; padding-top:12px; font-weight:700;">
         <span>Net result</span><span class="val ${net >= 0 ? "pos" : "neg"}">${net >= 0 ? "+" : ""}${fmtUSD(net)}</span>
       </div>
