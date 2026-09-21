@@ -448,6 +448,7 @@
         const h = c.margin > 0 ? Math.max((Math.min(c.margin, posCap) / posCap) * POS_BAR_MAX, 3) : 0;
         inner = `
           <div class="diverge-pos">
+            ${clipped ? `<span class="clip-chevron top">&#9650;</span>` : ""}
             ${c.margin !== 0 ? `<div class="cell-value">${fmtPct(c.margin, 0)}</div>` : ""}
             <div class="diverge-bar pos${clipped ? " clipped" : ""}" style="height:${h}px;"></div>
           </div>
@@ -464,10 +465,12 @@
           <div class="diverge-neg">
             <div class="diverge-bar neg${clipped ? " clipped" : ""}" style="height:${h}px;"></div>
             <div class="cell-value">${fmtPct(c.margin, 0)}</div>
+            ${clipped ? `<span class="clip-chevron bottom">&#9660;</span>` : ""}
           </div>
         `;
       }
-      return td(`<div class="diverge-cell">${inner}</div>`, i);
+      const crossing = i === firstProfitableIdx ? " crossing" : "";
+      return td(`<div class="diverge-cell${crossing}">${inner}</div>`, i);
     }).join("")}</tr>`;
 
     const salesRows = [
