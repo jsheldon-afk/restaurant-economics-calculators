@@ -127,7 +127,14 @@
     $("m-liftprofit").textContent = fmtUSD(s_profit);
     $("m-liftprofit-sub").textContent = `from ${fmtNum(seated)} Seated guests tonight`;
 
-    $("m-callout").innerHTML = `Adding <strong>${fmtNum(seated)} Seated guests</strong> tonight adds <strong>${fmtUSD(s_profit)}</strong> in pure incremental profit — total profit goes from ${fmtUSD(noS_profit)} to <strong>${fmtUSD(t_profit)}</strong> (${liftPct >= 0 ? "+" : ""}${fmtPct(liftPct)}), even though blended margin moves from ${fmtPct(noS_margin)} to ${fmtPct(t_margin)}.`;
+    const marginDelta = t_margin - noS_margin;
+    const marginClause = marginDelta < -0.0005
+      ? `even though blended margin dips slightly, from ${fmtPct(noS_margin)} to ${fmtPct(t_margin)} — because the Seated reward rate outweighs what spreading fixed costs over more covers saves you`
+      : marginDelta > 0.0005
+      ? `and blended margin actually improves, from ${fmtPct(noS_margin)} to ${fmtPct(t_margin)} — because those covers carry none of your fixed costs`
+      : `while blended margin holds steady at ${fmtPct(t_margin)}`;
+
+    $("m-callout").innerHTML = `Adding <strong>${fmtNum(seated)} Seated guests</strong> tonight adds <strong>${fmtUSD(s_profit)}</strong> in pure incremental profit — total profit goes from ${fmtUSD(noS_profit)} to <strong>${fmtUSD(t_profit)}</strong> (${liftPct >= 0 ? "+" : ""}${fmtPct(liftPct)}), ${marginClause}.`;
   }
   ["m-avgspend", "m-guests", "m-seated", "m-fb", "m-reward", "m-fixed"].forEach((id) => on($(id), "input", renderMargin));
 
