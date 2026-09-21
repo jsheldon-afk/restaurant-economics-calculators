@@ -352,12 +352,13 @@
 
     // bars (margin, can be negative)
     const maxAbs = Math.max(...cols.map((c) => Math.abs(c.margin)), 0.05);
-    $("t-bars").innerHTML = cols.map((c) => {
+    const firstSeatedIdx = cols.findIndex((c) => c.seatedCost !== 0);
+    $("t-bars").innerHTML = cols.map((c, i) => {
       const h = Math.max((Math.abs(c.margin) / maxAbs) * 128, 2);
-      const isBaseline = Math.abs(c.occPct - baseline) < 0.001;
+      const marksSeatedStart = i === firstSeatedIdx;
       return `<div class="bar-col">
         <div class="bar-value">${fmtPct(c.margin, 0)}</div>
-        <div class="bar ${c.margin < 0 ? "warn" : ""}" style="height:${h}px; ${isBaseline ? "outline:2px solid var(--ink); outline-offset:2px;" : ""}"></div>
+        <div class="bar ${c.margin < 0 ? "warn" : ""}" style="height:${h}px; ${marksSeatedStart ? "outline:2px solid var(--ink); outline-offset:2px;" : ""}"></div>
         <div class="bar-label">${fmtPct(c.occPct, 0)}</div>
       </div>`;
     }).join("");
