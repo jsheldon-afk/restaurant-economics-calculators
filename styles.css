@@ -195,6 +195,26 @@ main {
   margin-top: 14px;
 }
 
+/* horizontal control bar (used instead of the sidebar layout when a
+   table needs the full page width rather than fighting a 320px rail).
+   A fixed column count keeps every row balanced instead of leaving an
+   auto-fit remainder stranded alone on its own near-empty row. */
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 24px;
+}
+
+.controls-grid .field { margin-top: 14px; }
+
+@media (max-width: 760px) {
+  .controls-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .controls-grid { grid-template-columns: 1fr; }
+}
+
 .field label {
   display: flex;
   justify-content: space-between;

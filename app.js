@@ -121,6 +121,12 @@
     $("m-table").innerHTML = html;
 
     const liftPct = t_profit && noS_profit ? (t_profit - noS_profit) / Math.abs(noS_profit) : 0;
+
+    $("m-totalprofit").textContent = fmtUSD(t_profit);
+    $("m-totalprofit-sub").textContent = `${fmtPct(t_margin)} blended margin on ${fmtUSD(t_revenue)} revenue`;
+    $("m-liftprofit").textContent = fmtUSD(s_profit);
+    $("m-liftprofit-sub").textContent = `from ${fmtNum(seated)} Seated guests tonight`;
+
     $("m-callout").innerHTML = `Adding <strong>${fmtNum(seated)} Seated guests</strong> tonight adds <strong>${fmtUSD(s_profit)}</strong> in pure incremental profit — total profit goes from ${fmtUSD(noS_profit)} to <strong>${fmtUSD(t_profit)}</strong> (${liftPct >= 0 ? "+" : ""}${fmtPct(liftPct)}), even though blended margin moves from ${fmtPct(noS_margin)} to ${fmtPct(t_margin)}.`;
   }
   ["m-avgspend", "m-guests", "m-seated", "m-fb", "m-reward", "m-fixed"].forEach((id) => on($(id), "input", renderMargin));
