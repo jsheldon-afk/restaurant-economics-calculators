@@ -268,20 +268,38 @@
     const fb = pctInput("n-fb");
 
     const restaurantSales = avgCheck * nonSeatedGuests;
-    const seatedSales = avgCheck * seatedGuests;
-    const incrementalSeatedGuests = seatedGuests * newPct;
-    const incrementalSeatedSales = seatedSales * newPct;
+
+    // Split Seated guests into the new (incremental) and regular (repeat)
+    // share, since they have very different economics: new guests bring
+    // real incremental sales, regulars only cost the reward.
+    const newGuests = seatedGuests * newPct;
+    const regularGuests = seatedGuests * (1 - newPct);
+
+    const newSales = newGuests * avgCheck;
+    const regularSales = 0; // no incremental sales — they'd have come anyway
+
+    const newReward = -(newGuests * avgCheck * reward);
+    const regularReward = -(regularGuests * avgCheck * reward);
+
+    const newFbCost = -(newSales * fb);
+    const regularFbCost = 0;
+
+    const newNet = newSales + newReward + newFbCost;
+    const regularNet = regularSales + regularReward + regularFbCost;
 
     const noS_sales = restaurantSales;
-    const s_sales = incrementalSeatedSales;
-    const total_sales = noS_sales + s_sales;
-
-    const s_rewardCost = -(seatedSales * reward);
     const noS_fbCost = -(noS_sales * fb);
-    const s_fbCost = -(s_sales * fb);
-
     const noS_net = noS_sales + noS_fbCost;
-    const s_net = s_sales + s_rewardCost + s_fbCost;
+
+    // Seated total = new + regular
+    const s_sales = newSales + regularSales;
+    const s_rewardCost = newReward + regularReward;
+    const s_fbCost = newFbCost + regularFbCost;
+    const s_net = newNet + regularNet;
+
+    // Grand total = without Seated + Seated total
+    const total_sales = noS_sales + s_sales;
+    const total_fbCost = noS_fbCost + s_fbCost;
     const total_net = noS_net + s_net;
 
     const breakeven = reward < 1 ? 1 - reward / (1 - fb) : 0;
@@ -289,7 +307,7 @@
     const safe = repeatRate <= breakeven;
 
     $("n-netprofit").textContent = fmtUSD(s_net);
-    $("n-netprofit-sub").textContent = `from ${fmtUSD(s_sales)} in incremental sales`;
+    $("n-netprofit-sub").textContent = `+${fmtUSD(newNet)} from new guests, ${fmtUSD(regularNet)} from regulars`;
     $("n-breakeven").textContent = fmtPct(breakeven, 1);
 
     $("n-callout").className = "callout " + (safe ? "" : "negative");
@@ -297,14 +315,15 @@
       ? `At an assumed <strong>${fmtPct(newPct, 0)} new-guest rate</strong> (${fmtPct(repeatRate, 0)} repeat), you're well inside the breakeven line of ${fmtPct(breakeven, 1)} — Seated is net-positive by <strong>${fmtUSD(s_net)}</strong>.`
       : `At an assumed <strong>${fmtPct(newPct, 0)} new-guest rate</strong> (${fmtPct(repeatRate, 0)} repeat), you're past the breakeven line of ${fmtPct(breakeven, 1)} — Seated is currently net-negative by <strong>${fmtUSD(Math.abs(s_net))}</strong>.`;
 
+    const usdOrDash = (v) => (v ? fmtUSD(v) : "—");
     const rows = [
-      ["Guests", fmtNum(nonSeatedGuests), fmtNum(incrementalSeatedGuests), fmtNum(nonSeatedGuests + incrementalSeatedGuests), fmtNum(incrementalSeatedGuests)],
-      ["Sales", fmtUSD(noS_sales), fmtUSD(s_sales), fmtUSD(total_sales), fmtUSD(total_sales - noS_sales)],
-      ["Seated reward cost", "—", fmtUSD(s_rewardCost), fmtUSD(s_rewardCost), fmtUSD(s_rewardCost)],
-      ["F&amp;B cost", fmtUSD(noS_fbCost), fmtUSD(s_fbCost), fmtUSD(noS_fbCost + s_fbCost), fmtUSD(s_fbCost)],
+      ["Guests", fmtNum(nonSeatedGuests), fmtNum(newGuests), fmtNum(regularGuests), fmtNum(seatedGuests), fmtNum(nonSeatedGuests + seatedGuests)],
+      ["Sales", fmtUSD(noS_sales), fmtUSD(newSales), usdOrDash(regularSales), fmtUSD(s_sales), fmtUSD(total_sales)],
+      ["Seated reward cost", "—", fmtUSD(newReward), fmtUSD(regularReward), fmtUSD(s_rewardCost), fmtUSD(s_rewardCost)],
+      ["F&amp;B cost", fmtUSD(noS_fbCost), fmtUSD(newFbCost), usdOrDash(regularFbCost), fmtUSD(s_fbCost), fmtUSD(total_fbCost)],
     ];
-    let html = rows.map(([l, a, b, c, d]) => `<tr><td>${l}</td><td>${a}</td><td>${b}</td><td>${c}</td><td>${d}</td></tr>`).join("");
-    html += `<tr class="total"><td>Net profit</td><td class="${negClass(noS_net)}">${fmtUSD(noS_net)}</td><td class="${negClass(s_net)}">${fmtUSD(s_net)}</td><td class="${negClass(total_net)}">${fmtUSD(total_net)}</td><td class="${negClass(s_net)}">${fmtUSD(s_net)}</td></tr>`;
+    let html = rows.map(([l, a, b, c, d, e]) => `<tr><td>${l}</td><td>${a}</td><td>${b}</td><td>${c}</td><td>${d}</td><td>${e}</td></tr>`).join("");
+    html += `<tr class="total"><td>Net profit</td><td class="${negClass(noS_net)}">${fmtUSD(noS_net)}</td><td class="${negClass(newNet)}">${fmtUSD(newNet)}</td><td class="${negClass(regularNet)}">${fmtUSD(regularNet)}</td><td class="${negClass(s_net)}">${fmtUSD(s_net)}</td><td class="${negClass(total_net)}">${fmtUSD(total_net)}</td></tr>`;
     $("n-table").innerHTML = html;
   }
   ["n-avgcheck", "n-nonseated", "n-seatedguests", "n-newpct", "n-reward", "n-fb"].forEach((id) => on($(id), "input", renderNewGuest));
