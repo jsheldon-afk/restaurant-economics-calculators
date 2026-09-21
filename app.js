@@ -328,11 +328,12 @@
     const cols = steps.map((occPct) => {
       const guests = Math.round(occPct * cap);
       const sales = guests * spend;
+      const seatedSales = sales > baselineSales ? sales - baselineSales : 0;
       const fbCost = -(sales * fb);
-      const seatedCost = sales > baselineSales ? -((sales - baselineSales) * seatedPct) : 0;
+      const seatedCost = seatedSales ? -(seatedSales * seatedPct) : 0;
       const profit = sales + fbCost + seatedCost - fixed;
       const margin = sales ? profit / sales : 0;
-      return { occPct, guests, sales, fbCost, seatedCost, profit, margin };
+      return { occPct, guests, sales, seatedSales, fbCost, seatedCost, profit, margin };
     });
 
     // header
@@ -356,6 +357,7 @@
     const rowsDef = [
       ["Guests", (c) => fmtNum(c.guests)],
       ["Sales", (c) => fmtUSD(c.sales)],
+      ["Seated sales (above baseline)", (c) => (c.seatedSales ? fmtUSD(c.seatedSales) : "—")],
       ["F&amp;B cost", (c) => fmtUSD(c.fbCost)],
       ["Seated cost (above baseline)", (c) => (c.seatedCost ? fmtUSD(c.seatedCost) : "—")],
       ["Fixed cost", () => fmtUSD(-fixed)],
