@@ -208,7 +208,7 @@
     const liftPct = t_profit && noS_profit ? (t_profit - noS_profit) / Math.abs(noS_profit) : 0;
 
     $("m-totalprofit").textContent = fmtUSD(t_profit);
-    $("m-totalprofit-sub").textContent = `${fmtPct(t_margin)} blended margin on ${fmtUSD(t_revenue)} revenue`;
+    $("m-totalprofit-sub").textContent = `${fmtPct(t_margin)} blended margin on ${fmtUSD(t_revenue)} revenue tonight`;
     $("m-liftprofit").textContent = fmtUSD(s_profit);
     $("m-liftprofit-sub").textContent = `from ${fmtNum(seated)} Seated guests tonight`;
 
