@@ -714,6 +714,47 @@ table td.pos { color: var(--green); }
 .explainer .math-row .val.pos { color: var(--green); font-weight: 700; }
 .explainer .math-row .val.neg { color: var(--red); font-weight: 700; }
 
+/* small purpose-built SVG charts illustrating the mechanic behind a
+   tab's math (not raw data tables — one line/shape per concept) */
+.chart-frame {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 18px 10px;
+  margin-top: 14px;
+}
+
+.chart-frame svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+.chart-frame .axis-line { stroke: var(--border); stroke-width: 1; }
+.chart-frame .zero-line { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart-frame .axis-label { font-size: 10.5px; fill: var(--muted); font-family: inherit; }
+.chart-frame .line-baseline { fill: none; stroke: var(--ink); stroke-width: 2; }
+.chart-frame .line-seated { fill: none; stroke: var(--gold-fill); stroke-width: 2.5; }
+.chart-frame .line-profit { fill: none; stroke: var(--gold); stroke-width: 2.5; }
+.chart-frame .current-marker { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
+.chart-frame .dot-current { fill: var(--ink); stroke: var(--white); stroke-width: 1.5; }
+.chart-frame .dot-crossover { fill: var(--red); stroke: var(--white); stroke-width: 1.5; }
+.chart-frame .callout-label { font-size: 10.5px; font-weight: 700; fill: var(--ink); }
+
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 8px 0 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.chart-legend .swatch {
+  display: inline-block;
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
 footer {
   max-width: 1180px;
   margin: 0 auto;
