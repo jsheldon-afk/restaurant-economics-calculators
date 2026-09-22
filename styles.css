@@ -755,6 +755,76 @@ table td.pos { color: var(--green); }
   vertical-align: middle;
 }
 
+/* waterfall / bridge chart: revenue steps down for each cost, lands on
+   profit — a direct picture of a P&L column's arithmetic */
+.waterfall-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  margin-bottom: 24px;
+}
+
+@media (max-width: 640px) {
+  .waterfall-row { grid-template-columns: 1fr; }
+}
+
+.waterfall-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.waterfall {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 190px;
+  padding-top: 20px;
+}
+
+.waterfall-col {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  min-width: 0;
+}
+
+.waterfall-bar {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  border-radius: 4px;
+  transition: height 0.2s ease, bottom 0.2s ease;
+}
+
+.waterfall-bar.revenue { background: var(--gold-fill); }
+.waterfall-bar.cost { background: var(--red); opacity: 0.85; }
+.waterfall-bar.profit-pos { background: var(--green); }
+.waterfall-bar.profit-neg { background: var(--red); }
+
+.waterfall-value {
+  position: absolute;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.waterfall-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -20px;
+  text-align: center;
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
 /* 100-square grid: one literal picture of a week's covers, 1% each */
 .seat-grid {
   display: grid;
@@ -780,6 +850,23 @@ table td.pos { color: var(--green); }
 }
 
 .seat-grid-caption strong { color: var(--ink); }
+
+.seatgrid-layout {
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 20px;
+  align-items: start;
+}
+
+.seatgrid-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+@media (max-width: 760px) {
+  .seatgrid-layout { grid-template-columns: 1fr; }
+}
 
 footer {
   max-width: 1180px;

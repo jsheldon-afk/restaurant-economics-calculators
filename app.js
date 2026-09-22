@@ -69,6 +69,43 @@
     return svg;
   }
 
+  // ---------- small waterfall/bridge chart: a starting bar, one or more
+  // cost steps subtracted from it, and a final bar landing on the
+  // result — a direct picture of "revenue minus costs equals profit" ----------
+  function buildWaterfall(steps, heightPx = 150) {
+    let running = 0;
+    const bars = steps.map((s) => {
+      if (s.kind === "start") {
+        running = s.value;
+        return { label: s.label, top: s.value, bottom: 0, display: s.value };
+      }
+      if (s.kind === "end") {
+        return { label: s.label, top: Math.max(running, 0), bottom: Math.min(running, 0), display: running, isEnd: true };
+      }
+      const prev = running;
+      running += s.value;
+      return { label: s.label, top: Math.max(prev, running), bottom: Math.min(prev, running), display: s.value };
+    });
+
+    const allVals = bars.flatMap((b) => [b.top, b.bottom, 0]);
+    const maxVal = Math.max(...allVals);
+    const minVal = Math.min(...allVals);
+    const range = maxVal - minVal || 1;
+    const toPx = (v) => ((v - minVal) / range) * heightPx;
+
+    const cols = bars.map((b) => {
+      const barBottomPx = toPx(b.bottom);
+      const barHeightPx = Math.max(toPx(b.top) - barBottomPx, 2);
+      const kind = b.isEnd ? (b.display >= 0 ? "profit-pos" : "profit-neg") : b.display >= 0 ? "revenue" : "cost";
+      return `<div class="waterfall-col">
+        <div class="waterfall-value" style="bottom:${(barBottomPx + barHeightPx + 6).toFixed(0)}px;">${fmtUSD(b.display)}</div>
+        <div class="waterfall-bar ${kind}" style="bottom:${barBottomPx.toFixed(0)}px; height:${barHeightPx.toFixed(0)}px;"></div>
+        <div class="waterfall-label">${b.label}</div>
+      </div>`;
+    });
+    return `<div class="waterfall">${cols.join("")}</div>`;
+  }
+
   // ---------- tabs ----------
   const tabButtons = document.querySelectorAll(".tab-btn");
   const panels = document.querySelectorAll(".panel");
@@ -187,48 +224,31 @@
 
     $("m-callout").innerHTML = `Adding <strong>${fmtNum(seated)} Seated guests</strong> tonight adds <strong>${fmtUSD(s_profit)}</strong> in pure incremental profit — total profit goes from ${fmtUSD(noS_profit)} to <strong>${fmtUSD(t_profit)}</strong> (${liftPct >= 0 ? "+" : ""}${fmtPct(liftPct)}), ${marginClause}.`;
 
-    renderMarginChart(avgSpend, seated, fb, reward);
+    renderMarginChart(noS_revenue, noS_fbcost, noS_fixed, s_revenue, s_fbcost, s_seatedcost);
   }
 
-  // Visualizes the core, almost-always-true fact of this tab: the profit
-  // Seated guests add is revenue minus F&B cost minus the Seated fee, and
-  // that's linear in the reward rate. It only goes negative once the
-  // reward rate alone exceeds what's left after F&B — a far higher rate
-  // than Seated actually charges, so in practice this line never crosses
-  // zero within a realistic range.
-  function renderMarginChart(avgSpend, seated, fb, reward) {
-    const seatedRevenue = avgSpend * seated;
-    const profitAt = (r) => seatedRevenue * (1 - fb - r);
-    const yAt0 = profitAt(0);
-    const yAt1 = profitAt(1);
-    const zeroCrossing = 1 - fb; // reward rate where added profit hits $0
-
-    const allY = [yAt0, yAt1, 0];
-    let yMin = Math.min(...allY);
-    let yMax = Math.max(...allY);
-    const yPad = (yMax - yMin || 1) * 0.1;
-    yMin -= yPad;
-    yMax += yPad;
-
-    const dots = [{ x: reward, y: profitAt(reward), className: "dot-current" }];
-    if (zeroCrossing > 0 && zeroCrossing < 1) {
-      dots.push({ x: zeroCrossing, y: 0, className: "dot-crossover", label: `would need ${fmtPct(zeroCrossing, 0)} reward to turn negative`, labelBelow: yAt0 < 0 });
-    }
-
+  // Draws the table above as two waterfalls: revenue steps down for each
+  // cost and lands on profit. Directly shows the tab's core contrast —
+  // "Without Seated" pays fixed costs, "Seated Guests" pays the reward
+  // fee instead — using the same numbers already in the table.
+  function renderMarginChart(noS_revenue, noS_fbcost, noS_fixed, s_revenue, s_fbcost, s_seatedcost) {
+    const wfNoSeated = buildWaterfall([
+      { label: "Revenue", value: noS_revenue, kind: "start" },
+      { label: "F&amp;B cost", value: -noS_fbcost, kind: "delta" },
+      { label: "Fixed costs", value: -noS_fixed, kind: "delta" },
+      { label: "Profit", kind: "end" },
+    ]);
+    const wfSeated = buildWaterfall([
+      { label: "Revenue", value: s_revenue, kind: "start" },
+      { label: "F&amp;B cost", value: -s_fbcost, kind: "delta" },
+      { label: "Seated fee", value: -s_seatedcost, kind: "delta" },
+      { label: "Profit", kind: "end" },
+    ]);
     $("m-chart").innerHTML = `
-      <div class="chart-legend">
-        <span><span class="swatch" style="background:var(--gold);"></span>Profit added by Seated guests</span>
-        <span><span class="swatch" style="background:var(--muted); height:1px;"></span>Your current Seated reward rate</span>
+      <div class="waterfall-row">
+        <div><div class="waterfall-title">Without Seated</div>${wfNoSeated}</div>
+        <div><div class="waterfall-title">Seated Guests</div>${wfSeated}</div>
       </div>
-      ${svgLineChart({
-        xDomain: [0, 1],
-        yDomain: [yMin, yMax],
-        series: [{ points: [{ x: 0, y: yAt0 }, { x: 1, y: yAt1 }], className: "line-profit" }],
-        vLines: [{ x: reward, className: "current-marker" }],
-        dots,
-        xTicks: [0, 0.5, 1].map((x) => ({ x, label: fmtPct(x, 0) })),
-        yTicks: [yMin, 0, yMax].map((y) => ({ y, label: fmtUSD(y) })),
-      })}
     `;
   }
   ["m-avgspend", "m-guests", "m-seated", "m-fb", "m-reward", "m-fixed"].forEach((id) => on($(id), "input", renderMargin));
@@ -256,6 +276,7 @@
     const max = num("o-max");
     const check = num("o-check");
     const fb = pctInput("o-fb");
+    const reward = pctInput("o-reward");
 
     let totalCovers = 0, totalEmpty = 0, totalMissedSales = 0, totalMissedProfit = 0, totalMissedTips = 0;
     const perDay = DAYS.map((d, i) => {
@@ -339,6 +360,8 @@
     const gainSales = seatsFilled * check;
     const gainProfit = seatsFilled * check * (1 - fb);
     const gainTips = seatsFilled * check * 0.18;
+    const seatedCost = seatsFilled * check * reward;
+    const netAddedProfit = gainProfit - seatedCost;
     $("o-capture-stats").innerHTML = `
       <div class="stat-card">
         <div class="stat-label">Seats filled</div>
@@ -366,15 +389,32 @@
       </div>
     `;
 
-    // 100-square grid: a literal picture of the week, 1% per square
-    const filledSquares = Math.round(Math.max(0, Math.min(1, overallOcc)) * 100);
-    $("o-seatgrid").innerHTML = Array.from({ length: 100 }, (_, i) =>
-      `<div class="seat${i < filledSquares ? " filled" : ""}"></div>`
-    ).join("");
-    $("o-seatgrid-caption").innerHTML = `<strong>${fmtNum(totalCovers)}</strong> covers served out of <strong>${fmtNum(max * 7)}</strong> possible — <strong>${fmtNum(totalEmpty)}</strong> empty seats, every one of them lost profit.`;
+    // 100-square grid: a literal picture of the week, 1% per square.
+    // Gray = already served, gold = the slice Seated fills, pale = still
+    // empty even after that — moves live as the capture slider moves.
+    const servedSquares = Math.round(Math.max(0, Math.min(1, overallOcc)) * 100);
+    const weeklyCapacity = max * 7;
+    const seatedSquares = weeklyCapacity ? Math.round(Math.max(0, Math.min(1, seatsFilled / weeklyCapacity)) * 100) : 0;
+    const cappedSeated = Math.min(seatedSquares, 100 - servedSquares);
+    $("o-seatgrid").innerHTML = Array.from({ length: 100 }, (_, i) => {
+      let cls = "";
+      if (i < servedSquares) cls = "baseline";
+      else if (i < servedSquares + cappedSeated) cls = "filled";
+      return `<div class="seat ${cls}"></div>`;
+    }).join("");
+    $("o-seatgrid-caption").innerHTML = `<strong>${fmtNum(totalCovers)}</strong> served &middot; <strong>${fmtNum(seatsFilled)}</strong> filled by Seated &middot; <strong>${fmtNum(Math.max(totalEmpty - seatsFilled, 0))}</strong> still empty, out of <strong>${fmtNum(weeklyCapacity)}</strong> possible.`;
+
+    // Profit at current occupancy vs. profit with Seated's help, net of
+    // what Seated actually charges for filling those seats
+    const baselineProfit = totalCovers * check * (1 - fb);
+    const profitWithSeated = baselineProfit + netAddedProfit;
+    $("o-profit-current").textContent = fmtUSD(baselineProfit);
+    $("o-profit-current-sub").textContent = `from ${fmtNum(totalCovers)} covers served this week`;
+    $("o-profit-withseated").textContent = fmtUSD(profitWithSeated);
+    $("o-profit-withseated-sub").textContent = `+${fmtUSD(gainProfit)} gross − ${fmtUSD(seatedCost)} Seated fee = +${fmtUSD(netAddedProfit)} net`;
   }
 
-  ["o-max", "o-check", "o-fb"].forEach((id) => on($(id), "input", renderOccupancy));
+  ["o-max", "o-check", "o-fb", "o-reward"].forEach((id) => on($(id), "input", renderOccupancy));
   on($("o-capture"), "input", renderOccupancy);
 
   // ==============================================================
@@ -654,6 +694,17 @@
     ).join("");
     const baselineGuests = Math.round(baseline * cap);
     $("t-seatgrid-caption").innerHTML = `<strong>${fmtNum(baselineGuests)}</strong> covers filled at your baseline &middot; <strong>${fmtNum(cap - baselineGuests)}</strong> covers are Seated's to fill.`;
+
+    // profit if the restaurant stopped at its own baseline (no Seated
+    // cost at all, since none of that sales is Seated's) vs. profit at
+    // full occupancy once Seated has filled the rest
+    const baselineProfit = baselineSales * (1 - fb) - fixed;
+    const fullProfit = cols[cols.length - 1].profit;
+    const fullSeatedCost = cols[cols.length - 1].seatedCost;
+    $("t-profit-baseline").textContent = fmtUSD(baselineProfit);
+    $("t-profit-baseline-sub").textContent = `from ${fmtNum(baselineGuests)} covers, no Seated involved`;
+    $("t-profit-full").textContent = fmtUSD(fullProfit);
+    $("t-profit-full-sub").textContent = fullSeatedCost ? `after a ${fmtUSD(Math.abs(fullSeatedCost))} Seated fee on the top ${fmtNum(cap - baselineGuests)} covers` : `Seated isn't filling any covers at this baseline`;
   }
   ["t-spend", "t-fb", "t-seated", "t-cap", "t-fixed"].forEach((id) => on($(id), "input", renderOccTable));
   on($("t-baseline"), "input", renderOccTable);
