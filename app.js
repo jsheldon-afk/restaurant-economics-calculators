@@ -187,66 +187,47 @@
 
     $("m-callout").innerHTML = `Adding <strong>${fmtNum(seated)} Seated guests</strong> tonight adds <strong>${fmtUSD(s_profit)}</strong> in pure incremental profit — total profit goes from ${fmtUSD(noS_profit)} to <strong>${fmtUSD(t_profit)}</strong> (${liftPct >= 0 ? "+" : ""}${fmtPct(liftPct)}), ${marginClause}.`;
 
-    renderMarginChart(avgSpend, guests, fb, reward, fixed);
+    renderMarginChart(avgSpend, seated, fb, reward);
   }
 
-  // Visualizes *why* margin rises or falls: the Seated column's margin
-  // is flat (1 - F&B% - reward%, independent of check size), while the
-  // non-Seated margin climbs as checks get bigger (fixed costs matter
-  // less against a larger sale). Where they cross is the tipping point.
-  function renderMarginChart(avgSpend, guests, fb, reward, fixed) {
-    const seatedMargin = 1 - fb - reward;
-    const breakevenSpend = reward > 0 && guests > 0 ? fixed / (reward * guests) : null;
+  // Visualizes the core, almost-always-true fact of this tab: the profit
+  // Seated guests add is revenue minus F&B cost minus the Seated fee, and
+  // that's linear in the reward rate. It only goes negative once the
+  // reward rate alone exceeds what's left after F&B — a far higher rate
+  // than Seated actually charges, so in practice this line never crosses
+  // zero within a realistic range.
+  function renderMarginChart(avgSpend, seated, fb, reward) {
+    const seatedRevenue = avgSpend * seated;
+    const profitAt = (r) => seatedRevenue * (1 - fb - r);
+    const yAt0 = profitAt(0);
+    const yAt1 = profitAt(1);
+    const zeroCrossing = 1 - fb; // reward rate where added profit hits $0
 
-    const refs = [avgSpend, breakevenSpend].filter((v) => v && v > 0);
-    const xMax = Math.max((refs.length ? Math.max(...refs) : 100) * 1.6, 40);
-    // pick a left edge where the non-Seated curve is at most ~ -100%,
-    // so one extreme early value doesn't flatten the rest of the curve
-    const floorY = -1;
-    const denom = 1 - fb - floorY;
-    const xMinFromFloor = guests > 0 && denom > 0 ? fixed / (denom * guests) : 5;
-    const xMin = Math.max(3, Math.min(xMax * 0.4, xMinFromFloor));
-
-    const N = 48;
-    const curvePoints = [];
-    for (let i = 0; i <= N; i++) {
-      const x = xMin + ((xMax - xMin) * i) / N;
-      const rev = x * guests;
-      if (rev > 0) curvePoints.push({ x, y: 1 - fb - fixed / rev });
-    }
-
-    const allY = curvePoints.map((p) => p.y).concat([seatedMargin, 0]);
+    const allY = [yAt0, yAt1, 0];
     let yMin = Math.min(...allY);
     let yMax = Math.max(...allY);
-    const yPad = (yMax - yMin || 0.1) * 0.1;
+    const yPad = (yMax - yMin || 1) * 0.1;
     yMin -= yPad;
     yMax += yPad;
 
-    const dots = [
-      { x: avgSpend, y: seatedMargin, className: "dot-current" },
-      { x: avgSpend, y: curvePoints.length ? 1 - fb - fixed / (avgSpend * guests || 1) : seatedMargin, className: "dot-current" },
-    ];
-    if (breakevenSpend && breakevenSpend > xMin && breakevenSpend < xMax) {
-      dots.push({ x: breakevenSpend, y: seatedMargin, className: "dot-crossover", label: `breakeven ≈ ${fmtUSD(breakevenSpend)}`, labelBelow: true });
+    const dots = [{ x: reward, y: profitAt(reward), className: "dot-current" }];
+    if (zeroCrossing > 0 && zeroCrossing < 1) {
+      dots.push({ x: zeroCrossing, y: 0, className: "dot-crossover", label: `would need ${fmtPct(zeroCrossing, 0)} reward to turn negative`, labelBelow: yAt0 < 0 });
     }
 
     $("m-chart").innerHTML = `
       <div class="chart-legend">
-        <span><span class="swatch" style="background:var(--gold-fill);"></span>Seated guests' margin</span>
-        <span><span class="swatch" style="background:var(--ink);"></span>Without-Seated margin</span>
-        <span><span class="swatch" style="background:var(--muted); height:1px;"></span>Your current avg. check</span>
+        <span><span class="swatch" style="background:var(--gold);"></span>Profit added by Seated guests</span>
+        <span><span class="swatch" style="background:var(--muted); height:1px;"></span>Your current Seated reward rate</span>
       </div>
       ${svgLineChart({
-        xDomain: [xMin, xMax],
+        xDomain: [0, 1],
         yDomain: [yMin, yMax],
-        series: [
-          { points: [{ x: xMin, y: seatedMargin }, { x: xMax, y: seatedMargin }], className: "line-seated" },
-          { points: curvePoints, className: "line-baseline" },
-        ],
-        vLines: [{ x: avgSpend, className: "current-marker" }],
+        series: [{ points: [{ x: 0, y: yAt0 }, { x: 1, y: yAt1 }], className: "line-profit" }],
+        vLines: [{ x: reward, className: "current-marker" }],
         dots,
-        xTicks: [xMin, (xMin + xMax) / 2, xMax].map((x) => ({ x, label: fmtUSD(x) })),
-        yTicks: [yMin, 0, yMax].map((y) => ({ y, label: fmtPct(y, 0) })),
+        xTicks: [0, 0.5, 1].map((x) => ({ x, label: fmtPct(x, 0) })),
+        yTicks: [yMin, 0, yMax].map((y) => ({ y, label: fmtUSD(y) })),
       })}
     `;
   }
