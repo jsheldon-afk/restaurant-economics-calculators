@@ -226,8 +226,8 @@
 
   // Draws the table above as two waterfalls: revenue steps down for each
   // cost and lands on profit. Directly shows the tab's core contrast —
-  // "Without Seated" pays fixed costs, "Seated Guests" pays the reward
-  // fee instead — using the same numbers already in the table.
+  // current business economics pays fixed costs, new guest economics
+  // pays the reward fee instead — using the same numbers as the table.
   function renderMarginChart(noS_revenue, noS_fbcost, noS_fixed, s_revenue, s_fbcost, s_seatedcost) {
     const wfNoSeated = buildWaterfall([
       { label: "Revenue", value: noS_revenue, kind: "start" },
@@ -243,8 +243,8 @@
     ]);
     $("m-chart").innerHTML = `
       <div class="waterfall-row">
-        <div><div class="waterfall-title">Without Seated</div>${wfNoSeated}</div>
-        <div><div class="waterfall-title">Seated Guests</div>${wfSeated}</div>
+        <div><div class="waterfall-title">Current Business Economics</div>${wfNoSeated}</div>
+        <div><div class="waterfall-title">New Guest Economics</div>${wfSeated}</div>
       </div>
     `;
   }
