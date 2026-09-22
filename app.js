@@ -146,15 +146,12 @@
       <li>Out of the <strong>${fmtNum(seatedGuests)} Seated guests</strong> above, that's roughly <strong>${fmtNum(newGuests)} new</strong> and <strong>${fmtNum(existingGuests)} regulars</strong>.</li>
     `;
 
-    $("how-math-box").innerHTML = `
-      <div class="math-row"><span>Each new guest gains you</span><span class="val pos">+${fmtUSD(newGainPerGuest, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(${fmtUSD(avgCheck)} check &minus; ${fmtUSD(newGuestFbCost)} F&amp;B &minus; ${fmtUSD(newGuestRewardCost)} Seated fee)</span></span></div>
-      <div class="math-row"><span>${fmtNum(newGuests)} new guests gains you</span><span class="val pos">+${fmtUSD(gainTotal)}</span></div>
-      <div class="math-row"><span>Each regular guest loses you</span><span class="val neg">&minus;${fmtUSD(existLossPerGuest, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(${fmtPct(reward, 0)} Seated fee on their ${fmtUSD(avgCheck)} check)</span></span></div>
-      <div class="math-row"><span>${fmtNum(existingGuests)} regular guests loses you</span><span class="val neg">&minus;${fmtUSD(lossTotal)}</span></div>
-      <div class="math-row" style="border-top:2px solid var(--ink); margin-top:4px; padding-top:12px; font-weight:700;">
-        <span>Net result</span><span class="val ${net >= 0 ? "pos" : "neg"}">${net >= 0 ? "+" : ""}${fmtUSD(net)}</span>
-      </div>
-    `;
+    $("how-chart").innerHTML = buildWaterfall([
+      { label: `${fmtNum(newGuests)} new guests`, value: gainTotal, kind: "start" },
+      { label: `${fmtNum(existingGuests)} regulars`, value: -lossTotal, kind: "delta" },
+      { label: "Net result", kind: "end" },
+    ]);
+    $("how-math-note").innerHTML = `Each new guest gains <strong style="color:var(--green);">+${fmtUSD(newGainPerGuest, { decimals: 2 })}</strong> (${fmtUSD(avgCheck)} check &minus; ${fmtUSD(newGuestFbCost)} F&amp;B &minus; ${fmtUSD(newGuestRewardCost)} Seated fee). Each regular guest loses <strong style="color:var(--red);">&minus;${fmtUSD(existLossPerGuest, { decimals: 2 })}</strong> (${fmtPct(reward, 0)} Seated fee on their ${fmtUSD(avgCheck)} check).`;
   }
 
   // ==============================================================
