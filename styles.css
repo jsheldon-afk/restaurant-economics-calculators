@@ -725,19 +725,6 @@ table td.pos { color: var(--green); }
   margin-top: 14px;
 }
 
-.chart-frame svg { width: 100%; height: auto; display: block; overflow: visible; }
-
-.chart-frame .axis-line { stroke: var(--border); stroke-width: 1; }
-.chart-frame .zero-line { stroke: var(--border); stroke-width: 1; stroke-dasharray: 3 3; }
-.chart-frame .axis-label { font-size: 10.5px; fill: var(--muted); font-family: inherit; }
-.chart-frame .line-baseline { fill: none; stroke: var(--ink); stroke-width: 2; }
-.chart-frame .line-seated { fill: none; stroke: var(--gold-fill); stroke-width: 2.5; }
-.chart-frame .line-profit { fill: none; stroke: var(--gold); stroke-width: 2.5; }
-.chart-frame .current-marker { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 2 3; }
-.chart-frame .dot-current { fill: var(--ink); stroke: var(--white); stroke-width: 1.5; }
-.chart-frame .dot-crossover { fill: var(--red); stroke: var(--white); stroke-width: 1.5; }
-.chart-frame .callout-label { font-size: 10.5px; font-weight: 700; fill: var(--ink); }
-
 .chart-legend {
   display: flex;
   flex-wrap: wrap;

@@ -20,55 +20,6 @@
 
   const negClass = (n) => (n < 0 ? "neg" : n > 0 ? "pos" : "");
 
-  // ---------- small purpose-built SVG line chart, reused by a couple
-  // of "why this happens" visuals below each calculator ----------
-  function svgLineChart({ width = 560, height = 200, xDomain, yDomain, xTicks = [], yTicks = [], series = [], vLines = [], dots = [] }) {
-    const pad = { top: 16, right: 16, bottom: 26, left: 46 };
-    const plotW = width - pad.left - pad.right;
-    const plotH = height - pad.top - pad.bottom;
-    const sx = (x) => pad.left + ((x - xDomain[0]) / (xDomain[1] - xDomain[0])) * plotW;
-    const sy = (y) => pad.top + (1 - (y - yDomain[0]) / (yDomain[1] - yDomain[0])) * plotH;
-
-    let svg = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">`;
-
-    if (yDomain[0] < 0 && yDomain[1] > 0) {
-      const zy = sy(0).toFixed(1);
-      svg += `<line class="zero-line" x1="${pad.left}" y1="${zy}" x2="${width - pad.right}" y2="${zy}" />`;
-    }
-    svg += `<line class="axis-line" x1="${pad.left}" y1="${(height - pad.bottom).toFixed(1)}" x2="${width - pad.right}" y2="${(height - pad.bottom).toFixed(1)}" />`;
-
-    series.forEach((s) => {
-      if (!s.points || s.points.length < 2) return;
-      const d = s.points.map((p, i) => `${i === 0 ? "M" : "L"}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(" ");
-      svg += `<path class="${s.className}" d="${d}" />`;
-    });
-
-    vLines.forEach((v) => {
-      const x = sx(v.x).toFixed(1);
-      svg += `<line class="${v.className}" x1="${x}" y1="${pad.top}" x2="${x}" y2="${(height - pad.bottom).toFixed(1)}" />`;
-    });
-
-    dots.forEach((d) => {
-      const x = sx(d.x), y = sy(d.y);
-      svg += `<circle class="${d.className}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" />`;
-      if (d.label) {
-        const anchor = d.anchor || "middle";
-        const ly = d.labelBelow ? y + 16 : y - 10;
-        svg += `<text class="callout-label" x="${x.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="${anchor}">${d.label}</text>`;
-      }
-    });
-
-    xTicks.forEach((t) => {
-      svg += `<text class="axis-label" x="${sx(t.x).toFixed(1)}" y="${(height - pad.bottom + 16).toFixed(1)}" text-anchor="middle">${t.label}</text>`;
-    });
-    yTicks.forEach((t) => {
-      svg += `<text class="axis-label" x="${pad.left - 8}" y="${(sy(t.y) + 3).toFixed(1)}" text-anchor="end">${t.label}</text>`;
-    });
-
-    svg += `</svg>`;
-    return svg;
-  }
-
   // ---------- small waterfall/bridge chart: a starting bar, one or more
   // cost steps subtracted from it, and a final bar landing on the
   // result — a direct picture of "revenue minus costs equals profit" ----------
@@ -146,12 +97,15 @@
       <li>Out of the <strong>${fmtNum(seatedGuests)} Seated guests</strong> above, that's roughly <strong>${fmtNum(newGuests)} new</strong> and <strong>${fmtNum(existingGuests)} regulars</strong>.</li>
     `;
 
-    $("how-chart").innerHTML = buildWaterfall([
-      { label: `${fmtNum(newGuests)} new guests`, value: gainTotal, kind: "start" },
-      { label: `${fmtNum(existingGuests)} regulars`, value: -lossTotal, kind: "delta" },
-      { label: "Net result", kind: "end" },
-    ]);
-    $("how-math-note").innerHTML = `Each new guest gains <strong style="color:var(--green);">+${fmtUSD(newGainPerGuest, { decimals: 2 })}</strong> (${fmtUSD(avgCheck)} check &minus; ${fmtUSD(newGuestFbCost)} F&amp;B &minus; ${fmtUSD(newGuestRewardCost)} Seated fee). Each regular guest loses <strong style="color:var(--red);">&minus;${fmtUSD(existLossPerGuest, { decimals: 2 })}</strong> (${fmtPct(reward, 0)} Seated fee on their ${fmtUSD(avgCheck)} check).`;
+    $("how-math-box").innerHTML = `
+      <div class="math-row"><span>Each new guest gains you</span><span class="val pos">+${fmtUSD(newGainPerGuest, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(${fmtUSD(avgCheck)} check &minus; ${fmtUSD(newGuestFbCost)} F&amp;B &minus; ${fmtUSD(newGuestRewardCost)} Seated fee)</span></span></div>
+      <div class="math-row"><span>${fmtNum(newGuests)} new guests gains you</span><span class="val pos">+${fmtUSD(gainTotal)}</span></div>
+      <div class="math-row"><span>Each regular guest loses you</span><span class="val neg">&minus;${fmtUSD(existLossPerGuest, { decimals: 2 })} <span style="color:var(--muted); font-weight:400;">(${fmtPct(reward, 0)} Seated fee on their ${fmtUSD(avgCheck)} check)</span></span></div>
+      <div class="math-row"><span>${fmtNum(existingGuests)} regular guests loses you</span><span class="val neg">&minus;${fmtUSD(lossTotal)}</span></div>
+      <div class="math-row" style="border-top:2px solid var(--ink); margin-top:4px; padding-top:12px; font-weight:700;">
+        <span>Net result</span><span class="val ${net >= 0 ? "pos" : "neg"}">${net >= 0 ? "+" : ""}${fmtUSD(net)}</span>
+      </div>
+    `;
   }
 
   // ==============================================================
@@ -484,46 +438,6 @@
     let html = rows.map(([l, a, b, c, d, e]) => `<tr><td>${l}</td><td>${a}</td><td>${b}</td><td>${c}</td><td>${d}</td><td>${e}</td></tr>`).join("");
     html += `<tr class="total"><td>Net profit</td><td class="${negClass(noS_net)}">${fmtUSD(noS_net)}</td><td class="${negClass(newNet)}">${fmtUSD(newNet)}</td><td class="${negClass(regularNet)}">${fmtUSD(regularNet)}</td><td class="${negClass(s_net)}">${fmtUSD(s_net)}</td><td class="${negClass(total_net)}">${fmtUSD(total_net)}</td></tr>`;
     $("n-table").innerHTML = html;
-
-    renderNewGuestChart(seatedGuests, avgCheck, fb, reward, repeatRate, s_net, breakeven);
-  }
-
-  // Net new profit is linear in the repeat-guest rate: 100% new guests
-  // at one end, 100% regulars at the other. Visualizes the breakeven
-  // stat as an actual crossing point instead of just a number.
-  function renderNewGuestChart(seatedGuests, avgCheck, fb, reward, repeatRate, currentNet, breakeven) {
-    const gainPerNew = avgCheck * (1 - fb - reward);
-    const lossPerRegular = avgCheck * reward;
-    const yAt0 = seatedGuests * gainPerNew; // 0% repeat = all new guests
-    const yAt1 = -seatedGuests * lossPerRegular; // 100% repeat = all regulars
-
-    const allY = [yAt0, yAt1, 0];
-    let yMin = Math.min(...allY);
-    let yMax = Math.max(...allY);
-    const yPad = (yMax - yMin || 1) * 0.12;
-    yMin -= yPad;
-    yMax += yPad;
-
-    const dots = [{ x: repeatRate, y: currentNet, className: "dot-current" }];
-    if (breakeven >= 0 && breakeven <= 1) {
-      dots.push({ x: breakeven, y: 0, className: "dot-crossover", label: `breakeven ${fmtPct(breakeven, 0)}`, labelBelow: yAt0 < 0 });
-    }
-
-    $("n-chart").innerHTML = `
-      <div class="chart-legend">
-        <span><span class="swatch" style="background:var(--gold);"></span>Net new profit from Seated</span>
-        <span><span class="swatch" style="background:var(--muted); height:1px;"></span>Your current repeat rate</span>
-      </div>
-      ${svgLineChart({
-        xDomain: [0, 1],
-        yDomain: [yMin, yMax],
-        series: [{ points: [{ x: 0, y: yAt0 }, { x: 1, y: yAt1 }], className: "line-profit" }],
-        vLines: [{ x: repeatRate, className: "current-marker" }],
-        dots,
-        xTicks: [0, 0.5, 1].map((x) => ({ x, label: fmtPct(x, 0) })),
-        yTicks: [yMin, 0, yMax].map((y) => ({ y, label: fmtUSD(y) })),
-      })}
-    `;
   }
   ["n-avgcheck", "n-nonseated", "n-seatedguests", "n-newpct", "n-reward", "n-fb"].forEach((id) => on($(id), "input", renderNewGuest));
 
