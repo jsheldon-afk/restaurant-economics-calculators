@@ -202,21 +202,32 @@
       { label: "Seated fee", value: -s_seatedcost, kind: "delta" },
       { label: "Profit", kind: "end" },
     ]);
-    const wfTotal = buildWaterfall([
-      { label: "Current revenue", value: noS_revenue, kind: "start" },
-      { label: "Seated revenue", value: s_revenue, kind: "delta" },
-      { label: "F&amp;B cost", value: -(noS_fbcost + s_fbcost), kind: "delta" },
-      { label: "Fixed costs", value: -noS_fixed, kind: "delta" },
-      { label: "Seated fee", value: -s_seatedcost, kind: "delta" },
-      { label: "Profit", kind: "end" },
-    ]);
+    const noS_profit = noS_revenue - noS_fbcost - noS_fixed;
+    const s_profit = s_revenue - s_fbcost - s_seatedcost;
+    const t_profit = noS_profit + s_profit;
     $("m-chart").innerHTML = `
       <div class="waterfall-row">
         <div><div class="waterfall-title">Current Business Economics <span style="color:var(--muted); font-weight:400;">(annual)</span></div>${wfNoSeated}</div>
         <div><div class="waterfall-title">New Guest Economics <span style="color:var(--muted); font-weight:400;">(annual)</span></div>${wfSeated}</div>
       </div>
-      <div class="waterfall-row" style="grid-template-columns: 1fr;">
-        <div><div class="waterfall-title">Total Economics <span style="color:var(--muted); font-weight:400;">(annual)</span></div><div class="waterfall-scroll">${wfTotal}</div></div>
+      <div class="profit-equation">
+        <div class="stat-card equation-pill">
+          <div class="stat-label">Current Business Profit</div>
+          <div class="stat-value">${fmtUSD(noS_profit)}</div>
+          <div class="stat-sub">annual</div>
+        </div>
+        <div class="equation-op">+</div>
+        <div class="stat-card equation-pill">
+          <div class="stat-label">New Guest Profit</div>
+          <div class="stat-value">${fmtUSD(s_profit)}</div>
+          <div class="stat-sub">annual</div>
+        </div>
+        <div class="equation-op">=</div>
+        <div class="stat-card equation-pill emphasis">
+          <div class="stat-label">Total Profit</div>
+          <div class="stat-value">${fmtUSD(t_profit)}</div>
+          <div class="stat-sub">annual</div>
+        </div>
       </div>
     `;
   }
