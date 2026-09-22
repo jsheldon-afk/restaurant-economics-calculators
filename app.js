@@ -384,6 +384,13 @@
         <div class="stat-annual">${fmtUSD(gainTips * WEEKS)}/year</div>
       </div>
     `;
+
+    // 100-square grid: a literal picture of the week, 1% per square
+    const filledSquares = Math.round(Math.max(0, Math.min(1, overallOcc)) * 100);
+    $("o-seatgrid").innerHTML = Array.from({ length: 100 }, (_, i) =>
+      `<div class="seat${i < filledSquares ? " filled" : ""}"></div>`
+    ).join("");
+    $("o-seatgrid-caption").innerHTML = `<strong>${fmtNum(totalCovers)}</strong> covers served out of <strong>${fmtNum(max * 7)}</strong> possible — <strong>${fmtNum(totalEmpty)}</strong> empty seats, every one of them lost profit.`;
   }
 
   ["o-max", "o-check", "o-fb"].forEach((id) => on($(id), "input", renderOccupancy));
@@ -656,6 +663,16 @@
     html += `<tr class="total"><td>Profit</td>${cols.map((c, i) => td(fmtUSD(c.profit), i, negClass(c.profit))).join("")}</tr>`;
     html += `<tr><td>Profit margin</td>${cols.map((c, i) => td(fmtPct(c.margin), i, negClass(c.margin))).join("")}</tr>`;
     $("t-table").innerHTML = html;
+
+    // 100-square grid: at full capacity, how many seats are "yours"
+    // (baseline) vs. Seated's to fill
+    const baselineSquares = Math.round(Math.max(0, Math.min(1, baseline)) * 100);
+    $("t-seatgrid-intro").textContent = `At ${fmtNum(cap)} covers (100% occupancy), ${fmtPct(baseline, 0)} of those seats are ones you'd fill on your own — the rest is what Seated is actually responsible for.`;
+    $("t-seatgrid").innerHTML = Array.from({ length: 100 }, (_, i) =>
+      `<div class="seat ${i < baselineSquares ? "baseline" : "filled"}"></div>`
+    ).join("");
+    const baselineGuests = Math.round(baseline * cap);
+    $("t-seatgrid-caption").innerHTML = `<strong>${fmtNum(baselineGuests)}</strong> covers filled at your baseline &middot; <strong>${fmtNum(cap - baselineGuests)}</strong> covers are Seated's to fill.`;
   }
   ["t-spend", "t-fb", "t-seated", "t-cap", "t-fixed"].forEach((id) => on($(id), "input", renderOccTable));
   on($("t-baseline"), "input", renderOccTable);

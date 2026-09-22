@@ -755,6 +755,32 @@ table td.pos { color: var(--green); }
   vertical-align: middle;
 }
 
+/* 100-square grid: one literal picture of a week's covers, 1% each */
+.seat-grid {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 4px;
+  max-width: 460px;
+  margin: 4px auto 12px;
+}
+
+.seat-grid .seat {
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--border);
+}
+
+.seat-grid .seat.filled { background: var(--gold-fill); }
+.seat-grid .seat.baseline { background: var(--muted); }
+
+.seat-grid-caption {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.seat-grid-caption strong { color: var(--ink); }
+
 footer {
   max-width: 1180px;
   margin: 0 auto;
