@@ -757,6 +757,11 @@ table td.pos { color: var(--green); }
   margin-bottom: 24px;
 }
 
+/* grid items default to a content-based min-width, which would let the
+   6-column Total Economics chart's forced min-width push this row (and
+   the page) wider instead of actually scrolling — see the .grid rule above */
+.waterfall-row > * { min-width: 0; }
+
 @media (max-width: 640px) {
   .waterfall-row { grid-template-columns: 1fr; }
 }
@@ -776,6 +781,12 @@ table td.pos { color: var(--green); }
   height: 190px;
   padding-top: 20px;
 }
+
+/* a 6-column waterfall (the combined "Total Economics" chart) squeezes
+   its value labels into overlap on narrow screens — let it scroll
+   horizontally instead, same pattern as .table-wrap */
+.waterfall-scroll { overflow-x: auto; }
+.waterfall-scroll .waterfall { min-width: 480px; }
 
 .waterfall-col {
   flex: 1;

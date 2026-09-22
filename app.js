@@ -202,10 +202,21 @@
       { label: "Seated fee", value: -s_seatedcost, kind: "delta" },
       { label: "Profit", kind: "end" },
     ]);
+    const wfTotal = buildWaterfall([
+      { label: "Current revenue", value: noS_revenue, kind: "start" },
+      { label: "Seated revenue", value: s_revenue, kind: "delta" },
+      { label: "F&amp;B cost", value: -(noS_fbcost + s_fbcost), kind: "delta" },
+      { label: "Fixed costs", value: -noS_fixed, kind: "delta" },
+      { label: "Seated fee", value: -s_seatedcost, kind: "delta" },
+      { label: "Profit", kind: "end" },
+    ]);
     $("m-chart").innerHTML = `
       <div class="waterfall-row">
         <div><div class="waterfall-title">Current Business Economics <span style="color:var(--muted); font-weight:400;">(annual)</span></div>${wfNoSeated}</div>
         <div><div class="waterfall-title">New Guest Economics <span style="color:var(--muted); font-weight:400;">(annual)</span></div>${wfSeated}</div>
+      </div>
+      <div class="waterfall-row" style="grid-template-columns: 1fr;">
+        <div><div class="waterfall-title">Total Economics <span style="color:var(--muted); font-weight:400;">(annual)</span></div><div class="waterfall-scroll">${wfTotal}</div></div>
       </div>
     `;
   }
