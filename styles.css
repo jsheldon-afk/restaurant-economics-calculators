@@ -191,6 +191,12 @@ main {
   top: 74px;
 }
 
+/* sticky only makes sense beside a second column; on the stacked
+   single-column mobile layout it pins the inputs card over the content below */
+@media (max-width: 860px) {
+  .inputs-card { position: static; top: auto; }
+}
+
 .field {
   margin-top: 14px;
 }

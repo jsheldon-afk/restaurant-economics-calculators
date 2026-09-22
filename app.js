@@ -161,9 +161,13 @@
 
     const liftPct = t_profit && noS_profit ? (t_profit - noS_profit) / Math.abs(noS_profit) : 0;
 
+    const NIGHTS_PER_YEAR = 365;
+
     $("m-totalprofit").textContent = fmtUSD(t_profit);
+    $("m-totalprofit-annual").textContent = `${fmtUSD(t_profit * NIGHTS_PER_YEAR)}/year`;
     $("m-totalprofit-sub").textContent = `${fmtPct(t_margin)} blended margin on ${fmtUSD(t_revenue)} revenue tonight`;
     $("m-liftprofit").textContent = fmtUSD(s_profit);
+    $("m-liftprofit-annual").textContent = `${fmtUSD(s_profit * NIGHTS_PER_YEAR)}/year`;
     $("m-liftprofit-sub").textContent = `from ${fmtNum(seated)} Seated guests tonight`;
 
     const marginDelta = t_margin - noS_margin;
@@ -173,9 +177,12 @@
       ? `and blended margin actually improves, from ${fmtPct(noS_margin)} to ${fmtPct(t_margin)} — because those covers carry none of your fixed costs`
       : `while blended margin holds steady at ${fmtPct(t_margin)}`;
 
-    $("m-callout").innerHTML = `Adding <strong>${fmtNum(seated)} Seated guests</strong> tonight adds <strong>${fmtUSD(s_profit)}</strong> in pure incremental profit — total profit goes from ${fmtUSD(noS_profit)} to <strong>${fmtUSD(t_profit)}</strong> (${liftPct >= 0 ? "+" : ""}${fmtPct(liftPct)}), ${marginClause}.`;
+    $("m-callout").innerHTML = `Adding <strong>${fmtNum(seated)} Seated guests</strong> every night adds <strong>${fmtUSD(s_profit * NIGHTS_PER_YEAR)}</strong> a year in pure incremental profit — annual profit goes from ${fmtUSD(noS_profit * NIGHTS_PER_YEAR)} to <strong>${fmtUSD(t_profit * NIGHTS_PER_YEAR)}</strong> (${liftPct >= 0 ? "+" : ""}${fmtPct(liftPct)}), ${marginClause}.`;
 
-    renderMarginChart(noS_revenue, noS_fbcost, noS_fixed, s_revenue, s_fbcost, s_seatedcost);
+    renderMarginChart(
+      noS_revenue * NIGHTS_PER_YEAR, noS_fbcost * NIGHTS_PER_YEAR, noS_fixed * NIGHTS_PER_YEAR,
+      s_revenue * NIGHTS_PER_YEAR, s_fbcost * NIGHTS_PER_YEAR, s_seatedcost * NIGHTS_PER_YEAR
+    );
   }
 
   // Draws the table above as two waterfalls: revenue steps down for each
@@ -197,8 +204,8 @@
     ]);
     $("m-chart").innerHTML = `
       <div class="waterfall-row">
-        <div><div class="waterfall-title">Current Business Economics</div>${wfNoSeated}</div>
-        <div><div class="waterfall-title">New Guest Economics</div>${wfSeated}</div>
+        <div><div class="waterfall-title">Current Business Economics <span style="color:var(--muted); font-weight:400;">(annual)</span></div>${wfNoSeated}</div>
+        <div><div class="waterfall-title">New Guest Economics <span style="color:var(--muted); font-weight:400;">(annual)</span></div>${wfSeated}</div>
       </div>
     `;
   }
